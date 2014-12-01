@@ -39,14 +39,20 @@ object AppBundler {
 
   def toPath(p: String): Path = Paths.get(p)
 
-  def createBundle(conf: BundleStructure, appConf: AppConf, infoPlistConf: InfoPlistConf) = {
+  /**
+   * Builds a .app package in the output directory.
+   *
+   * @param conf
+   * @param infoPlistConf
+   */
+  def createBundle(conf: BundleStructure, infoPlistConf: InfoPlistConf) = {
     conf.prepare()
     PlistWriter.write(infoPlistConf, conf.infoPlistFile)
     writePkgInfo(infoPlistConf.signature, conf.pkgInfoFile)
     copyExecutable(conf.macOSDir / infoPlistConf.executableName)
     copyResources(conf.resourcesDir)
-    copyRuntime(appConf.javaHome, conf.pluginsDir)
-    copyClassPath(appConf.jars, conf.javaDir)
+    copyRuntime(infoPlistConf.javaHome, conf.pluginsDir)
+    copyClassPath(infoPlistConf.jars, conf.javaDir)
     // if no icon is defined, copies the default one from resources, otherwise copies the specified one
     infoPlistConf.iconFile.fold(copy(Util.resource(DEFAULT_ICON_NAME), conf.resourcesDir / DEFAULT_ICON_NAME))(p => {
       copy(p, conf.resourcesDir / p.getFileName)
@@ -122,7 +128,7 @@ object AppBundler {
    * @param javaHome a valid java home path, or `javaHome`
    * @return
    */
-  private def resolveJavaDirectory(javaHome: Path): Path =
+  def resolveJavaDirectory(javaHome: Path): Path =
     if (!Files.isDirectory(javaHome) && Files.isExecutable(javaHome)) {
       Paths get Process(javaHome.toString).lines.head
     } else {
@@ -191,7 +197,4 @@ object AppBundler {
       files.foreach(f => Files.createFile(f))
     }
   }
-
-  case class AppConf(jars: Seq[Path], javaHome: Path = Paths get "/usr/libexec/java_home")
-
 }

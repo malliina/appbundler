@@ -1,6 +1,6 @@
 package com.mle.appbundler
 
-import java.nio.file.Path
+import java.nio.file.{Path, Paths}
 
 /**
  * @author mle
@@ -10,7 +10,8 @@ case class InfoPlistConf(displayName: String,
                          identifier: String,
                          version: String,
                          mainClass: String,
-                         jvmRuntimeDirName: Path,
+                         jars: Seq[Path],
+                         javaHome: Path = Paths get "/usr/libexec/java_home",
                          jvmOptions: Seq[String] = Nil,
                          jvmArguments: Seq[String] = Nil,
                          iconFile: Option[Path] = None,
@@ -26,6 +27,8 @@ case class InfoPlistConf(displayName: String,
                          signature: String = "????",
                          additional: Map[String, String] = Map.empty,
                          additionalArrays: Map[String, Seq[String]] = Map.empty) {
+  val jvmRuntimeDirName = Option(AppBundler.resolveJavaDirectory(javaHome).getParent).map(_.getParent) getOrElse javaHome
+
   private def map: Map[String, String] = Map(
     "CFBundleDevelopmentRegion" -> "English",
     "CFBundleExecutable" -> executableName,
