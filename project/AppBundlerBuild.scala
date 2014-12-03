@@ -13,6 +13,7 @@ object AppBundlerBuild extends Build {
     scalaVersion := "2.11.4",
     crossScalaVersions := Seq("2.10.4", scalaVersion.value),
     fork in Test := true,
-    libraryDependencies ++= Seq("com.github.malliina" %% "util" % "1.5.0")
+    libraryDependencies ++= Seq("com.github.malliina" %% "util" % "1.5.0"),
+    updateOptions := updateOptions.value.withCachedResolution(true)
   )
 }

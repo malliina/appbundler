@@ -5,57 +5,64 @@ import java.nio.file.Path
 import com.mle.file.FileUtilities
 
 import scala.xml.dtd.{DocType, PublicID}
-import scala.xml.{Node, PrettyPrinter, XML}
+import scala.xml._
 
 /**
  * Do not format this document with IntelliJ IDEA.
  *
  * @author Michael
  */
-object PlistWriter {
+object PlistWriter extends XmlWriter{
 //  val PLIST_DTD = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
   val docType = DocType("plist", PublicID("-//Apple//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd"), Nil)
 
-  def write(conf: InfoPlistConf, dest: Path) = {
-    FileUtilities.writerTo(dest)(_.println(stringify(conf)))
+  def writeConf(conf: InfoPlistConf, dest: Path) =
+    writePretty(confXml(conf), dest)
+
+  def writeDaemon(appIdentifier: String, displayName: String, dest: Path) =
+    writePretty(daemonXml(appIdentifier, displayName), dest)
+
+  override def prefix: String = decl() + docTypeString(docType)
+
+  def daemonXml(appIdentifier: String, displayName: String) = plistXml {
+    <key>Label</key>
+    <string>{appIdentifier}</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Applications/{displayName}.app/Contents/MacOS/JavaAppLauncher</string>
+    </array>
+    <key>KeepAlive</key>
+    <true/>
+    <key>RunAtLoad</key>
+    <true/>
   }
 
-  def stringify(conf: InfoPlistConf): String = {
-    val xml = plistXml(conf)
-    val printer = new PrettyPrinter(1000, 2)
-    val payload = printer format xml
-    decl() + docTypeString(docType) + payload
+  def docTypeString(docType: DocType) = s"$docType\n"
+
+  def confXml(conf: InfoPlistConf): Node = plistXml {
+    conf.singles.map(p => toProperty(p._1, p._2)) ++ conf.arrays.map(a => toArray(a._1, a._2))
   }
 
-  def decl(enc: String= "UTF-8") = s"<?xml version='1.0' encoding='$enc'?>\n"
-
-  def docTypeString(docType:DocType) = s"$docType\n"
-
-  def savePlist(xml: Node, file:Path) = {
-    XML.save(file.toString, xml, "UTF-8", xmlDecl = true, docType)
-  }
-
-  def plistXml(conf: InfoPlistConf): Node = {
+  def plistXml(dictContent: Iterable[NodeSeq]): Node = {
     <plist version="1.0">
       <dict>
-        {conf.singles.map(p => toProperty(p._1, p._2))}
-        {conf.arrays.map(a => toArray(a._1, a._2))}
+        {dictContent}
       </dict>
     </plist>
   }
 
-  def toProperty(key: String, value: String) = {
+  def toProperty(key: String, value: String): NodeSeq = {
     <key>{key}</key>
     <string>{value}</string>
   }
 
-  def toArray(key: String, values: Seq[String]) = {
+  def toArray(key: String, values: Seq[String]): NodeSeq = {
     <key>{key}</key>
     <array>
       {values.map(toValue)}
     </array>
   }
-  def toValue(value: String) = {
+  def toValue(value: String): NodeSeq = {
     <string>{value}</string>
   }
 }

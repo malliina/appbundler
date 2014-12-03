@@ -47,14 +47,13 @@ object AppBundler {
    */
   def createBundle(conf: BundleStructure, infoPlistConf: InfoPlistConf) = {
     conf.prepare()
-    PlistWriter.write(infoPlistConf, conf.infoPlistFile)
+    PlistWriter.writeConf(infoPlistConf, conf.infoPlistFile)
     writePkgInfo(infoPlistConf.signature, conf.pkgInfoFile)
     copyExecutable(conf.macOSDir / infoPlistConf.executableName)
     copyResources(conf.resourcesDir)
     copyRuntime(infoPlistConf.javaHome, conf.pluginsDir)
     copyClassPath(infoPlistConf.jars, conf.javaDir)
-    // if no icon is defined, copies the default one from resources, otherwise copies the specified one
-    infoPlistConf.iconFile.fold(copy(Util.resource(DEFAULT_ICON_NAME), conf.resourcesDir / DEFAULT_ICON_NAME))(p => {
+    infoPlistConf.iconFile.fold(copyResourceSameName(DEFAULT_ICON_NAME, conf.resourcesDir))(p => {
       copy(p, conf.resourcesDir / p.getFileName)
     })
   }
@@ -64,8 +63,6 @@ object AppBundler {
     copyResource(exeFile.getName, dest)
     exeFile.setExecutable(true, false)
   }
-
-  private def copyResource(resName: String, dest: Path) = copy(Util.resource(resName), dest)
 
   /**
    * I do not understand what this is.
@@ -156,14 +153,20 @@ object AppBundler {
     }
   }
 
-  def delete(file: Path): Unit = {
-    if (Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
-      if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
-        file.toFile.listFiles().map(_.toPath).foreach(delete)
-      }
-      Files.delete(file)
-    }
-  }
+  /**
+   * Copies `file` to `dest` if defined, otherwise copies the resource at `orElseResource` to `dest`.
+   *
+   * @param file optional file
+   * @param orElseResource fallback resource
+   * @param dest destination file
+   */
+  def copyFileOrResource(file: Option[Path], orElseResource: String, dest: Path) =
+    file.fold(copyResource(orElseResource, dest))(f => copy(f, dest))
+
+  def copyResourceSameName(resName: String, destDir: Path) =
+    copyResource(resName, destDir / Paths.get(resName).getFileName)
+
+  def copyResource(resName: String, dest: Path) = copy(Util.resource(resName), dest)
 
   def copy(url: URL, dest: Path): Unit = {
     Util.using(url.openStream())(stream => Files.copy(stream, dest, StandardCopyOption.REPLACE_EXISTING))
@@ -178,23 +181,12 @@ object AppBundler {
     Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
   }
 
-  case class BundleStructure(outputDir: Path, appName: String) {
-    val appDir = outputDir / s"$appName.app"
-    val contentsDir = appDir / "Contents"
-    val macOSDir = contentsDir / "MacOS"
-    val javaDir = contentsDir / "Java"
-    val pluginsDir = contentsDir / "PlugIns"
-    val resourcesDir = contentsDir / "Resources"
-    val infoPlistFile = contentsDir / "Info.plist"
-    val pkgInfoFile = contentsDir / "PkgInfo"
-
-    val dirs = Seq(appDir, contentsDir, macOSDir, javaDir, pluginsDir, resourcesDir)
-    val files = Seq(infoPlistFile, pkgInfoFile)
-
-    def prepare() = {
-      delete(appDir)
-      dirs.foreach(d => Files.createDirectories(d))
-      files.foreach(f => Files.createFile(f))
+  def delete(file: Path): Unit = {
+    if (Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
+      if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
+        file.toFile.listFiles().map(_.toPath).foreach(delete)
+      }
+      Files.delete(file)
     }
   }
 }

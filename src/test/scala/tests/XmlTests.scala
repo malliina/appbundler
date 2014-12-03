@@ -20,7 +20,7 @@ class XmlTests extends FunSuite {
       Seq("option 1", "option 2"),
       Seq("arg1", "arg2"))
     //    PlistWriter.write(conf, Paths get "E:\\Info.plist")
-    val xml = PlistWriter.stringify(conf)
+    val xml = PlistWriter.stringifyConf(conf)
     println(xml)
   }
 }
