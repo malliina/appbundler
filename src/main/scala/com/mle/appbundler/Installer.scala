@@ -14,11 +14,12 @@ case class Installer(rootOutput: Path,
                      version: String,
                      organization: String,
                      appIdentifier: String,
+                     conf: BundleStructure,
+                     infoPlistConf: InfoPlistConf,
+                     launchdConf: Option[LaunchdConf] = None,
                      welcomeHtml: Option[Path] = None,
                      licenseHtml: Option[Path] = None,
-                     conclusionHtml: Option[Path] = None,
-                     conf: BundleStructure,
-                     infoPlistConf: InfoPlistConf) extends Log {
+                     conclusionHtml: Option[Path] = None) extends Log {
   val appOutput = rootOutput / "out"
   val applicationsDir = appOutput / "Applications"
   val dotAppDir = applicationsDir / s"$displayName.app"
@@ -37,9 +38,11 @@ case class Installer(rootOutput: Path,
     AppBundler.copyFileOrResource(licenseHtml, "license.html", resourcesDir / "license.html")
     AppBundler.copyFileOrResource(conclusionHtml, "conclusion.html", resourcesDir / "conclusion.html")
     Files.createDirectories(scriptsDir)
-    writePreInstall(appIdentifier, launchPlistFile, scriptsDir / "preinstall")
-    writePostInstall(launchPlistFile, scriptsDir / "postinstall")
-    PlistWriter.writeDaemon(appIdentifier, displayName, launchPlistFile)
+    launchdConf.foreach(launchd => {
+      launchd.write(launchPlistFile)
+      writePreInstall(appIdentifier, launchPlistFile, scriptsDir / "preinstall")
+      writePostInstall(launchPlistFile, scriptsDir / "postinstall")
+    })
     AppBundler.createBundle(conf, infoPlistConf)
     //      val bundle = macAppDir
     //      val cmd = Seq("/usr/bin/SetFile", "-a", "B", bundle.toString)

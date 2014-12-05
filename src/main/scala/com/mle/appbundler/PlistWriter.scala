@@ -16,26 +16,25 @@ object PlistWriter extends XmlWriter{
 //  val PLIST_DTD = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
   val docType = DocType("plist", PublicID("-//Apple//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd"), Nil)
 
-  def writeConf(conf: InfoPlistConf, dest: Path) =
-    writePretty(confXml(conf), dest)
+  def writeConf(conf: InfoPlistConf, dest: Path) = writePretty(confXml(conf), dest)
 
-  def writeDaemon(appIdentifier: String, displayName: String, dest: Path) =
-    writePretty(daemonXml(appIdentifier, displayName), dest)
+//  def writeDaemon(appIdentifier: String, displayName: String, dest: Path) =
+//    writePretty(daemonXml(appIdentifier, displayName), dest)
 
   override def prefix: String = decl() + docTypeString(docType)
 
-  def daemonXml(appIdentifier: String, displayName: String) = plistXml {
-    <key>Label</key>
-    <string>{appIdentifier}</string>
-    <key>ProgramArguments</key>
-    <array>
-      <string>/Applications/{displayName}.app/Contents/MacOS/JavaAppLauncher</string>
-    </array>
-    <key>KeepAlive</key>
-    <true/>
-    <key>RunAtLoad</key>
-    <true/>
-  }
+//  def daemonXml(appIdentifier: String, displayName: String) = plistXml {
+//    <key>Label</key>
+//    <string>{appIdentifier}</string>
+//    <key>ProgramArguments</key>
+//    <array>
+//      <string>/Applications/{displayName}.app/Contents/MacOS/JavaAppLauncher</string>
+//    </array>
+//    <key>KeepAlive</key>
+//    <true/>
+//    <key>RunAtLoad</key>
+//    <true/>
+//  }
 
   def docTypeString(docType: DocType) = s"$docType\n"
 
@@ -64,5 +63,28 @@ object PlistWriter extends XmlWriter{
   }
   def toValue(value: String): NodeSeq = {
     <string>{value}</string>
+  }
+  def toBool(key: String, value: Boolean) = {
+    <key>{key}</key> ++ toBoolean(value)
+  }
+  def toBoolean(bool: Boolean) =
+    if(bool) <true/>
+    else <false/>
+
+  def dictionary(key: String, kvs: Map[String,String]) = {
+    <key>{key}</key>
+    <dict>
+      {kvs.map(p => toProperty(p._1, p._2))}
+    </dict>
+  }
+  def booleanDict(key: String, bool: Boolean) = {
+    <dict>
+      <key>{key}</key>
+      {toBoolean(bool)}
+    </dict>
+  }
+
+  def optionalProperty(key: String, value: Option[String]) = {
+    value.fold(NodeSeq.Empty)(toProperty(key, _))
   }
 }
