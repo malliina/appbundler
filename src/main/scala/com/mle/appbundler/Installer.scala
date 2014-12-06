@@ -1,6 +1,6 @@
 package com.mle.appbundler
 
-import java.nio.file.{Files, Path}
+import java.nio.file.{Paths, Files, Path}
 
 import com.mle.file.{FileUtilities, StorageFile}
 import com.mle.util.Log
@@ -19,7 +19,8 @@ case class Installer(rootOutput: Path,
                      launchdConf: Option[LaunchdConf] = None,
                      welcomeHtml: Option[Path] = None,
                      licenseHtml: Option[Path] = None,
-                     conclusionHtml: Option[Path] = None) extends Log {
+                     conclusionHtml: Option[Path] = None,
+                     deleteOutOnComplete: Boolean = true) extends Log {
   val appOutput = rootOutput / "out"
   val applicationsDir = appOutput / "Applications"
   val dotAppDir = applicationsDir / s"$displayName.app"
@@ -29,19 +30,23 @@ case class Installer(rootOutput: Path,
   val scriptsDir = rootOutput / "Scripts"
   val pkgDir = rootOutput / "Pkg"
   val packageFile = rootOutput / s"$name-$version.pkg"
-  val launchPlistFile = appOutput / "Library" / "LaunchDaemons" / s"$appIdentifier.plist"
+  private val launchdPlistPath = (Paths get "Library") / "LaunchDaemons" / s"$appIdentifier.plist"
+  val launchdBuildPath = appOutput / launchdPlistPath
+  val launchdInstallPath = (Paths get "/") / launchdPlistPath
 
   def macPackage() = {
+    AppBundler.delete(appOutput)
     Files.createDirectories(appOutput)
-    Distribution.writeDistribution(DistributionConf(appIdentifier, organization, displayName, name), distributionFile)
+    Distribution.writeDistribution(DistributionConf(appIdentifier, displayName, name), distributionFile)
     AppBundler.copyFileOrResource(welcomeHtml, "welcome.html", resourcesDir / "welcome.html")
     AppBundler.copyFileOrResource(licenseHtml, "license.html", resourcesDir / "license.html")
     AppBundler.copyFileOrResource(conclusionHtml, "conclusion.html", resourcesDir / "conclusion.html")
     Files.createDirectories(scriptsDir)
     launchdConf.foreach(launchd => {
-      launchd.write(launchPlistFile)
-      writePreInstall(appIdentifier, launchPlistFile, scriptsDir / "preinstall")
-      writePostInstall(launchPlistFile, scriptsDir / "postinstall")
+      Files.createDirectories(launchdBuildPath.getParent)
+      launchd.write(launchdBuildPath)
+      writePreInstall(appIdentifier, launchdInstallPath, scriptsDir / "preinstall")
+      writePostInstall(launchdInstallPath, scriptsDir / "postinstall")
     })
     AppBundler.createBundle(conf, infoPlistConf)
     //      val bundle = macAppDir
@@ -56,7 +61,9 @@ case class Installer(rootOutput: Path,
      * development machine. I don't know why, I suspect I'm doing something wrong, but deleting the directory is a
      * workaround.
      */
-    AppBundler.delete(appOutput)
+    if (deleteOutOnComplete) {
+      AppBundler.delete(appOutput)
+    }
     log info s"Created $packageFile"
     packageFile
   }
@@ -89,16 +96,6 @@ case class Installer(rootOutput: Path,
     packageFile.toString
   )
 
-
-  def writePostInstall(launchPlist: Path, buildDest: Path) = {
-    scriptify(launchPlist, buildDest)(p => {
-      s"""#!/bin/sh
-        |set -s
-        |/bin/launchctl load "$p"
-      """
-    })
-  }
-
   def writePreInstall(identifier: String, launchPlist: Path, buildDest: Path) =
     scriptify(launchPlist, buildDest)(p => {
       s"""#!/bin/sh
@@ -106,6 +103,14 @@ case class Installer(rootOutput: Path,
         |if /bin/launchctl list "$identifier" &> /dev/null; then
         |    /bin/launchctl unload "$p"
         |fi"""
+    })
+
+  def writePostInstall(launchPlist: Path, buildDest: Path) =
+    scriptify(launchPlist, buildDest)(p => {
+      s"""#!/bin/sh
+        |set -e
+        |/bin/launchctl load "$p"
+      """
     })
 
   def scriptify(launchPlist: Path, buildDest: Path)(f: Path => String) = {

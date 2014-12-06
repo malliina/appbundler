@@ -7,8 +7,8 @@ import com.mle.file.StorageFile
 /**
  * @author Michael
  */
-case class BundleStructure(outputDir: Path, appName: String) {
-  val appDir = outputDir / s"$appName.app"
+case class BundleStructure(outputDir: Path, displayName: String) {
+  val appDir = outputDir / s"$displayName.app"
   val contentsDir = appDir / "Contents"
   val macOSDir = contentsDir / "MacOS"
   val javaDir = contentsDir / "Java"

@@ -42,10 +42,10 @@ case class LaunchdConf(label: String,
 }
 
 object LaunchdConf {
+  def executable(displayName: String) = s"/Applications/$displayName.app/Contents/MacOS/JavaAppLauncher"
 
   def defaultSettings(displayName: String, appIdentifier: String) = {
-    val argument = s"/Applications/$displayName.app/Contents/MacOS/JavaAppLauncher"
-    LaunchdConf(appIdentifier, Seq(argument))
+    LaunchdConf(appIdentifier, Seq(executable(displayName)))
   }
 
   trait KeepAliveOption {

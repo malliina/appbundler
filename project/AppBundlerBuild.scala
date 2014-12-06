@@ -9,7 +9,7 @@ object AppBundlerBuild extends Build {
   lazy val projectSettings = Seq(
     SbtUtils.gitUserName := "malliina",
     SbtUtils.developerName := "Michael Skogberg",
-    version := "0.2.0",
+    version := "0.3.3",
     scalaVersion := "2.11.4",
     crossScalaVersions := Seq("2.10.4", scalaVersion.value),
     fork in Test := true,
