@@ -4,12 +4,12 @@ A work in progress port of Oracle's appbundler for OSX.
 
 For SBT integration, see [sbt-packager](https://github.com/malliina/sbt-packager).
 
-## Requirements ##
+## Features ##
 
-- Must not rely on Ant
-- Must support Oracle Java 7 and later
-- Must be able to include a suitable JRE in the .app package
-- Must be able to run the app as a service (launchd)
+- Does not rely on Ant
+- Supports Oracle Java 7 and later
+- Can include a suitable JRE in the .app package
+- Can optionally run the app as a service (using launchd)
 
 ## Installation ##
 
