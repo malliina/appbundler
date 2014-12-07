@@ -9,7 +9,6 @@ import com.mle.util.Log
  * To create a .pkg package of your app, run `macPackage()`.
  */
 case class Installer(rootOutput: Path,
-                     organization: String,
                      infoPlistConf: InfoPlistConf,
                      launchdConf: Option[LaunchdConf] = None,
                      welcomeHtml: Option[Path] = None,
@@ -22,7 +21,6 @@ case class Installer(rootOutput: Path,
   val name = infoPlistConf.name
   val version = infoPlistConf.version
   val appIdentifier = infoPlistConf.identifier
-  val structure = BundleStructure(applicationsDir, displayName)
   val distributionFile = rootOutput / "Distribution.xml"
   val resourcesDir = rootOutput / "Resources"
   val scriptsDir = rootOutput / "Scripts"
@@ -46,7 +44,7 @@ case class Installer(rootOutput: Path,
       writePreInstall(appIdentifier, launchdInstallPath, scriptsDir / "preinstall")
       writePostInstall(launchdInstallPath, scriptsDir / "postinstall")
     })
-    AppBundler.createBundle(structure, infoPlistConf)
+    AppBundler.createBundle(infoPlistConf, applicationsDir)
     //      val bundle = macAppDir
     //      val cmd = Seq("/usr/bin/SetFile", "-a", "B", bundle.toString)
     //      ExeUtils.execute(cmd, log)
@@ -95,24 +93,24 @@ case class Installer(rootOutput: Path,
   )
 
   def writePreInstall(identifier: String, launchPlist: Path, buildDest: Path) =
-    scriptify(launchPlist, buildDest)(p => {
+    scriptify(buildDest) {
       s"""#!/bin/sh
         |set -e
         |if /bin/launchctl list "$identifier" &> /dev/null; then
-        |    /bin/launchctl unload "$p"
+        |    /bin/launchctl unload "$launchPlist"
         |fi"""
-    })
+    }
 
   def writePostInstall(launchPlist: Path, buildDest: Path) =
-    scriptify(launchPlist, buildDest)(p => {
+    scriptify(buildDest) {
       s"""#!/bin/sh
         |set -e
-        |/bin/launchctl load "$p"
+        |/bin/launchctl load "$launchPlist"
       """
-    })
+    }
 
-  def scriptify(launchPlist: Path, buildDest: Path)(f: Path => String) = {
-    FileUtilities.writerTo(buildDest)(w => w.println(f(launchPlist).stripMargin))
+  def scriptify(buildDest: Path)(f: => String) = {
+    FileUtilities.writerTo(buildDest)(w => w.println(f.stripMargin))
     buildDest.toFile.setExecutable(true, false)
   }
 }

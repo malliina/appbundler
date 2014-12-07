@@ -29,7 +29,8 @@ case class InfoPlistConf(displayName: String,
                          signature: String = "????",
                          additional: Map[String, String] = Map.empty,
                          additionalArrays: Map[String, Seq[String]] = Map.empty) {
-  val jvmRuntimeDirName = Option(AppBundler.resolveJavaDirectory(javaHome).getParent).map(_.getParent) getOrElse javaHome
+  val jvmRuntimeDirName = Option(AppBundler.resolveJavaDirectory(javaHome).getParent)
+    .flatMap(p => Option(p.getParent)) getOrElse javaHome
 
   private def map: Map[String, String] = Map(
     "CFBundleDevelopmentRegion" -> "English",

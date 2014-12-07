@@ -41,11 +41,9 @@ object AppBundler {
 
   /**
    * Builds a .app package in the output directory.
-   *
-   * @param conf
-   * @param infoPlistConf
    */
-  def createBundle(conf: BundleStructure, infoPlistConf: InfoPlistConf) = {
+  def createBundle(infoPlistConf: InfoPlistConf, dest: Path) = {
+    val conf = BundleStructure(infoPlistConf.displayName, dest)
     conf.prepare()
     PlistWriter.writeConf(infoPlistConf, conf.infoPlistFile)
     writePkgInfo(infoPlistConf.signature, conf.pkgInfoFile)
