@@ -13,15 +13,11 @@ For SBT integration, see [sbt-packager](https://github.com/malliina/sbt-packager
 
 ## Usage ##
 
-To create a .pkg installer of your application, create an instance of `com.mle.appbundler.Installer`
-and then run `Installer.macPackage()`.
-
-Example:
+First, create an `InfoPlistConf` instance representing your app:
 
 ```
 import java.nio.file.{Path, Paths}
 import com.mle.appbundler.{InfoPlistConf, Installer}
-val outDir: Path = ???
 val plist = InfoPlistConf(
   displayName = "My App",
   name = "myapp",
@@ -32,15 +28,18 @@ val plist = InfoPlistConf(
 )
 ```
 
-To create an app using the above config, use:
+To create an installer of your app with the above config, use:
 
 ```
-Installer(rootOutput = outDir, infoPlistConf = plist).macPackage()
+Installer(rootOutput = ???, infoPlistConf = plist).macPackage()
 ```
 
-To create an app that starts automatically when the machine boots (using launchd), use:
+To create an installer that also starts the app automatically when the machine boots (using launchd), use:
 
 ```
 val launchd = LaunchdConf.defaultSettings(plist.displayName, plist.identifier)
-Installer(rootOutput = outDir, infoPlistConf = plist, launchdConf = Some(launchd)).macPackage()
+Installer(rootOutput = ???, infoPlistConf = plist, launchdConf = Some(launchd)).macPackage()
 ```
+
+To further customize the installer and app packaging, check the various parameters to `InfoPlistConf`, `Installer`
+and `LaunchdConf`.

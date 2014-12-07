@@ -19,10 +19,7 @@ class Samples extends FunSuite {
       mainClass = "com.github.malliina.myapp.Start",
       jars = Seq("myapp.jar", "lib.jar", "other_lib.jar") map (jar => Paths.get(jar))
     )
-    val appInstaller = Installer(
-      rootOutput = outDir,
-      infoPlistConf = plist
-    )
+    val appInstaller = Installer(rootOutput = outDir, infoPlistConf = plist)
     val launchd = LaunchdConf.defaultSettings(plist.displayName, plist.identifier)
     val serviceInstaller = appInstaller.copy(launchdConf = Some(launchd))
   }
