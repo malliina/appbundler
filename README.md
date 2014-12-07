@@ -24,6 +24,7 @@ First, create an `InfoPlistConf` instance representing your app:
 ```
 import java.nio.file.{Path, Paths}
 import com.mle.appbundler.{InfoPlistConf, Installer}
+
 val plist = InfoPlistConf(
   displayName = "My App",
   name = "myapp",
