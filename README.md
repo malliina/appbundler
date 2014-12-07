@@ -11,6 +11,12 @@ For SBT integration, see [sbt-packager](https://github.com/malliina/sbt-packager
 - Must be able to include a suitable JRE in the .app package
 - Must be able to run the app as a service (launchd)
 
+## Installation ##
+
+```
+"com.github.malliina" %% "appbundler" % "0.7.1"
+```
+
 ## Usage ##
 
 First, create an `InfoPlistConf` instance representing your app:

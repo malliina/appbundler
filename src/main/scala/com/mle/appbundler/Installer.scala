@@ -33,6 +33,7 @@ case class Installer(rootOutput: Path,
   def macPackage() = {
     AppBundler.delete(appOutput)
     Files.createDirectories(appOutput)
+    Files.createDirectories(launchdBuildPath.getParent)
     Distribution.writeDistribution(DistributionConf(appIdentifier, displayName, name), distributionFile)
     AppBundler.copyFileOrResource(welcomeHtml, "welcome.html", resourcesDir / "welcome.html")
     AppBundler.copyFileOrResource(licenseHtml, "license.html", resourcesDir / "license.html")
@@ -60,9 +61,11 @@ case class Installer(rootOutput: Path,
     if (deleteOutOnComplete) {
       AppBundler.delete(appOutput)
     }
-    log info s"Created $packageFile"
+    log info s"Created $packageFile."
     packageFile
   }
+
+  def withLaunchd() = copy(launchdConf = Some(LaunchdConf(appIdentifier, Seq(LaunchdConf.executable(displayName)))))
 
   def pkgBuild = Seq(
     "/usr/bin/pkgbuild",

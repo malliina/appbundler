@@ -41,8 +41,12 @@ object AppBundler {
 
   /**
    * Builds a .app package in the output directory.
+   *
+   * @param infoPlistConf app conf
+   * @param dest root dest path
+   * @return path to DisplayName.app
    */
-  def createBundle(infoPlistConf: InfoPlistConf, dest: Path) = {
+  def createBundle(infoPlistConf: InfoPlistConf, dest: Path): Path = {
     val conf = BundleStructure(infoPlistConf.displayName, dest)
     conf.prepare()
     PlistWriter.writeConf(infoPlistConf, conf.infoPlistFile)
@@ -54,6 +58,7 @@ object AppBundler {
     infoPlistConf.iconFile.fold(copyResourceSameName(DEFAULT_ICON_NAME, conf.resourcesDir))(p => {
       copy(p, conf.resourcesDir / p.getFileName)
     })
+    conf.appDir
   }
 
   def copyExecutable(dest: Path) = {
