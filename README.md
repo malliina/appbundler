@@ -48,4 +48,4 @@ Installer(rootOutput = ???, infoPlistConf = plist, launchdConf = Some(launchd)).
 ```
 
 To further customize the installer and app packaging, check the various parameters to `InfoPlistConf`, `Installer`
-and `LaunchdConf`.
+and `LaunchdConf`, then eventually run `Installer.macPackage()`.
