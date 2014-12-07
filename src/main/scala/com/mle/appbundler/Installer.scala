@@ -1,6 +1,6 @@
 package com.mle.appbundler
 
-import java.nio.file.{Paths, Files, Path}
+import java.nio.file.{Files, Path, Paths}
 
 import com.mle.file.{FileUtilities, StorageFile}
 import com.mle.util.Log
@@ -14,7 +14,6 @@ case class Installer(rootOutput: Path,
                      version: String,
                      organization: String,
                      appIdentifier: String,
-                     conf: BundleStructure,
                      infoPlistConf: InfoPlistConf,
                      launchdConf: Option[LaunchdConf] = None,
                      welcomeHtml: Option[Path] = None,
@@ -23,8 +22,9 @@ case class Installer(rootOutput: Path,
                      deleteOutOnComplete: Boolean = true) extends Log {
   val appOutput = rootOutput / "out"
   val applicationsDir = appOutput / "Applications"
-  val dotAppDir = applicationsDir / s"$displayName.app"
-  val contentsDir = dotAppDir / "Contents"
+  val structure = BundleStructure(applicationsDir, displayName)
+//  val dotAppDir = structure.appDir
+//  val contentsDir = structure.contentsDir
   val distributionFile = rootOutput / "Distribution.xml"
   val resourcesDir = rootOutput / "Resources"
   val scriptsDir = rootOutput / "Scripts"
@@ -48,7 +48,7 @@ case class Installer(rootOutput: Path,
       writePreInstall(appIdentifier, launchdInstallPath, scriptsDir / "preinstall")
       writePostInstall(launchdInstallPath, scriptsDir / "postinstall")
     })
-    AppBundler.createBundle(conf, infoPlistConf)
+    AppBundler.createBundle(structure, infoPlistConf)
     //      val bundle = macAppDir
     //      val cmd = Seq("/usr/bin/SetFile", "-a", "B", bundle.toString)
     //      ExeUtils.execute(cmd, log)
