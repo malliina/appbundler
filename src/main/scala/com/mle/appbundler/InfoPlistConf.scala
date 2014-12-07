@@ -2,6 +2,8 @@ package com.mle.appbundler
 
 import java.nio.file.{Path, Paths}
 
+import com.mle.appbundler.InfoPlistConf.{DEFAULT_EXECUTABLE_NAME, DEFAULT_JAVA}
+
 /**
  * @author mle
  */
@@ -11,11 +13,11 @@ case class InfoPlistConf(displayName: String,
                          version: String,
                          mainClass: String,
                          jars: Seq[Path],
-                         javaHome: Path = Paths get "/usr/libexec/java_home",
+                         javaHome: Path = DEFAULT_JAVA,
                          jvmOptions: Seq[String] = Nil,
                          jvmArguments: Seq[String] = Nil,
                          iconFile: Option[Path] = None,
-                         executableName: String = "JavaAppLauncher",
+                         executableName: String = DEFAULT_EXECUTABLE_NAME,
                          workingDir: Option[String] = None,
                          copyright: String = "",
                          shortVersion: String = "1.0",
@@ -65,4 +67,9 @@ case class InfoPlistConf(displayName: String,
     "JVMOptions" -> jvmOptions,
     "JVMArguments" -> jvmArguments
   ) ++ additionalArrays
+}
+
+object InfoPlistConf {
+  val DEFAULT_JAVA = Paths get "/usr/libexec/java_home"
+  val DEFAULT_EXECUTABLE_NAME = "JavaAppLauncher"
 }

@@ -9,11 +9,7 @@ import com.mle.util.Log
  * To create a .pkg package of your app, run `macPackage()`.
  */
 case class Installer(rootOutput: Path,
-                     displayName: String,
-                     name: String,
-                     version: String,
                      organization: String,
-                     appIdentifier: String,
                      infoPlistConf: InfoPlistConf,
                      launchdConf: Option[LaunchdConf] = None,
                      welcomeHtml: Option[Path] = None,
@@ -22,9 +18,11 @@ case class Installer(rootOutput: Path,
                      deleteOutOnComplete: Boolean = true) extends Log {
   val appOutput = rootOutput / "out"
   val applicationsDir = appOutput / "Applications"
+  val displayName = infoPlistConf.displayName
+  val name = infoPlistConf.name
+  val version = infoPlistConf.version
+  val appIdentifier = infoPlistConf.identifier
   val structure = BundleStructure(applicationsDir, displayName)
-//  val dotAppDir = structure.appDir
-//  val contentsDir = structure.contentsDir
   val distributionFile = rootOutput / "Distribution.xml"
   val resourcesDir = rootOutput / "Resources"
   val scriptsDir = rootOutput / "Scripts"
