@@ -48,4 +48,3 @@ object Distribution extends XmlWriter {
     </installer-gui-script>
   }
 }
-case class DistributionConf(appIdentifier: String, displayName: String, name: String)
