@@ -11,22 +11,29 @@ object Distribution extends XmlWriter {
 
   def writeDistribution(conf: DistributionConf, dest: Path) = writePretty(xml(conf), dest)
 
+  /**
+   * Modified from the web, TODO add link.
+   *
+   * @param conf
+   * @return
+   */
   def xml(conf: DistributionConf): Node = {
 //    val org = conf.organization
     val appID = conf.appIdentifier
     val daemonName = s"$appID.daemon"
     val displayName = conf.displayName
     val pkgName = s"${conf.name}.pkg"
+    //      <welcome file="welcome.html" mime-type="text/html"/>
+    //      <license file="license.html" mime-type="text/html"/>
+    //      <conclusion file="conclusion.html" mime-type="text/html"/>
 
     <installer-gui-script minSpecVersion="1">
       <title>{displayName}</title>
       <organization>{appID}</organization>
       <domains enable_localSystem="true"/>
       <options customize="never" require-scripts="true" rootVolumeOnly="true"/>
-      <!-- Define documents displayed at various steps -->
-      <welcome file="welcome.html" mime-type="text/html"/>
-      <license file="license.html" mime-type="text/html"/>
-      <conclusion file="conclusion.html" mime-type="text/html"/>
+      <!-- For exmaple define documents displayed at various steps -->
+      {conf.additionalXml}
       <!-- List all component packages -->
       <pkg-ref id={daemonName}
                version="0"

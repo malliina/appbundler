@@ -1,14 +1,24 @@
 package com.mle.appbundler
 
+import java.nio.file.Path
+
 import org.slf4j.Logger
 
 import scala.sys.process.Process
+import scala.sys.process.ProcessBuilder
 
 
 /**
  * @author Michael
  */
 object ExeUtils {
+
+  def executeRedirected(cmd: Seq[String], redir: Path, logger: Logger): Unit = {
+    import scala.sys.process._
+    val processBuilder = cmd #> redir.toFile
+    logged(cmd, processBuilder, logger)
+  }
+
   /**
    * Executes the supplied command with the given parameters,
    * logging the command and any subsequent output using the logger's INFO level.
@@ -16,21 +26,16 @@ object ExeUtils {
    * @param cmd command to execute
    * @param logger the logger
    */
-  def execute(cmd: Seq[String], logger: Logger) {
-    val output = execute2(cmd, logger)
-    output.foreach(line => logger.info(line))
+  def execute(cmd: Seq[String], logger: Logger) = logged(cmd, Process(cmd), logger)
+
+  def logged(cmd: Seq[String], pb: => ProcessBuilder, logger: Logger): Unit = {
+    logger info cmd.mkString(" ")
+    runLogged(pb, logger)
   }
 
-  /**
-   * Executes the supplied command, logging only the command executed.
-   *
-   * @param cmd
-   * @param logger
-   * @return all output lines up to termination
-   */
-  def execute2(cmd: Seq[String], logger: Logger): Stream[String] = {
-    logger.info(cmd.mkString(" "))
-    Process(cmd.head, cmd.tail).lines
+  def runLogged(pb: ProcessBuilder, logger: Logger) = {
+    val stream = pb.lines
+    stream.foreach(line => logger.info(line))
   }
 }
 

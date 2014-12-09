@@ -56,11 +56,11 @@ case class InfoPlistConf(displayName: String,
     workingDir.map(wd => "WorkingDirectory" -> wd)
   ).flatten.toMap
 
-  private def boolMap = Seq(
-    if (hideDock) Some("LSUIElement" -> hideDock) else None,
-    if (highResolutionCapable) Some("NSHighResolutionCapable" -> highResolutionCapable) else None,
-    if (supportsAutomaticGraphicsSwitching) Some("NSSupportsAutomaticGraphicsSwitching" -> supportsAutomaticGraphicsSwitching) else None
-  ).flatten.map(pair => pair._1 -> pair._2.toString).toMap
+  private def boolMap: Map[String, String] = Seq(
+    if (hideDock) Some("LSUIElement" -> "1") else None,
+    if (highResolutionCapable) Some("NSHighResolutionCapable" -> highResolutionCapable.toString) else None,
+    if (supportsAutomaticGraphicsSwitching) Some("NSSupportsAutomaticGraphicsSwitching" -> supportsAutomaticGraphicsSwitching.toString) else None
+  ).flatten.map(pair => pair._1 -> pair._2).toMap
 
   def singles = map ++ optMap ++ boolMap ++ additional
 

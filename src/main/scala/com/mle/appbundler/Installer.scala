@@ -1,6 +1,6 @@
 package com.mle.appbundler
 
-import java.nio.file.{StandardCopyOption, Files, Path, Paths}
+import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
 import com.mle.file.{FileUtilities, StorageFile}
 import com.mle.util.Log
@@ -21,7 +21,7 @@ case class Installer(rootOutput: Path,
                      infoPlistConf: InfoPlistConf,
                      launchdConf: Option[LaunchdConf] = None,
                      iconFile: Option[Path] = None,
-                     additionalDmgFiles: Seq[Path] = Nil,
+                     additionalDmgFiles: Seq[FileMapping] = Nil,
                      welcomeHtml: Option[Path] = None,
                      licenseHtml: Option[Path] = None,
                      conclusionHtml: Option[Path] = None,
@@ -48,9 +48,10 @@ case class Installer(rootOutput: Path,
     Files.createDirectories(appOutput)
     Files.createDirectories(launchdBuildPath.getParent)
     Distribution.writeDistribution(DistributionConf(appIdentifier, displayName, name), distributionFile)
-    AppBundler.copyFileOrResource(welcomeHtml, "welcome.html", resourcesDir / "welcome.html")
-    AppBundler.copyFileOrResource(licenseHtml, "license.html", resourcesDir / "license.html")
-    AppBundler.copyFileOrResource(conclusionHtml, "conclusion.html", resourcesDir / "conclusion.html")
+    Files.createDirectories(resourcesDir)
+    //    AppBundler.copyFileOrResource(welcomeHtml, "welcome.html", resourcesDir / "welcome.html")
+    //    AppBundler.copyFileOrResource(licenseHtml, "license.html", resourcesDir / "license.html")
+    //    AppBundler.copyFileOrResource(conclusionHtml, "conclusion.html", resourcesDir / "conclusion.html")
     Files.createDirectories(scriptsDir)
     launchdConf.foreach(launchd => {
       Files.createDirectories(launchdBuildPath.getParent)
@@ -83,14 +84,25 @@ case class Installer(rootOutput: Path,
     packageFile
   }
 
-  def dmgPackage(): Path = {
-    val pkgFile = macPackage()
-    additionalDmgFiles.foreach(file => Files.copy(file, dmgSourceDir / file.getFileName, StandardCopyOption.REPLACE_EXISTING))
+  /**
+   *
+   * @return the built .dmg file
+   */
+  def dmgPackage(): Path = buildDmg(macPackage(), displayName, dmgFile)
+
+  def buildDmg(pkgFile: Path, displayName: String, outFile: Path) = {
+    val dmgRoot = pkgFile.getParent
+    val absolutes = additionalDmgFiles.map(fm => fm.copy(after = dmgRoot / fm.after))
+    absolutes.foreach(fm => {
+      val dest = fm.after
+      Option(dest.getParent).foreach(d => Files.createDirectories(d))
+      Files.copy(fm.before, dest, StandardCopyOption.REPLACE_EXISTING)
+    })
     // hides the extension of the files in the .dmg image when opened in Finder
-    (pkgFile +: additionalDmgFiles).map(hideExtension).foreach(execute)
+    (pkgFile +: absolutes.map(_.after)).map(hideExtension).foreach(execute)
     // runs hdiutil
-    execute(hdiutil(displayName, dmgSourceDir, dmgFile))
-    dmgFile
+    execute(hdiutil(displayName, dmgRoot, outFile))
+    outFile
   }
 
   def withLaunchd() = copy(launchdConf = Some(LaunchdConf(appIdentifier, Seq(LaunchdConf.executable(displayName)))))
@@ -136,11 +148,13 @@ case class Installer(rootOutput: Path,
     val iconResource = Paths get "tmpicns.rsrc"
     val iconResourceStr = iconResource.toString
     val sip = Seq("/usr/bin/sips", "-i", iconStr)
-    val deRez = Seq("/usr/bin/DeRez", "-only", "icns", iconStr, ">", iconResourceStr)
+    val deRez = Seq("/usr/bin/DeRez", "-only", "icns", iconStr)
     val rez = Seq("/usr/bin/Rez", "-append", iconResourceStr, "-o", fileStr)
     val setIcon = Seq("/usr/bin/SetFile", "-a", "C", fileStr)
     Files.deleteIfExists(iconResource)
-    Seq(sip, deRez, rez, setIcon).foreach(execute)
+    execute(sip)
+    ExeUtils.executeRedirected(deRez, iconResource, log)
+    Seq(rez, setIcon).foreach(execute)
   }
 
   /**
