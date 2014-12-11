@@ -1,8 +1,8 @@
 package com.mle.appbundler
 
-import java.nio.file.Path
+import java.nio.file.{Paths, Path}
 
-import com.mle.appbundler.LaunchdConf.{KeepAliveOption, OnDemand}
+import com.mle.appbundler.LaunchdConf.{KeepAliveOption, OnDemand, DEFAULT_PLIST_DIR}
 import com.mle.appbundler.PlistWriter._
 
 import scala.xml.Node
@@ -21,7 +21,9 @@ case class LaunchdConf(label: String,
                        workingDirectory: Option[Path] = None,
                        environmentVariables: Map[String, String] = Map.empty,
                        standardOut: Option[Path] = None,
-                       standardError: Option[Path] = None) {
+                       standardError: Option[Path] = None,
+                       plistDir: Path = DEFAULT_PLIST_DIR) {
+
   lazy val xml = plistXml {
     toProperty("Label", label) ++
       toArray("ProgramArguments", programArguments) ++
@@ -42,6 +44,8 @@ case class LaunchdConf(label: String,
 }
 
 object LaunchdConf {
+  val DEFAULT_PLIST_DIR = Paths get "/Library/LaunchAgents"
+
   def executable(displayName: String) = s"/Applications/$displayName.app/Contents/MacOS/JavaAppLauncher"
 
   def defaultSettings(displayName: String, appIdentifier: String) = {

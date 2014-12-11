@@ -39,21 +39,19 @@ case class Installer(rootOutput: Path,
   val dmgSourceDir = rootOutput / "DmgContents"
   val packageFile = dmgSourceDir / s"Install $displayName.pkg"
   val dmgFile = rootOutput / s"$name-$version.dmg"
-  private val launchdPlistPath = (Paths get "Library") / "LaunchDaemons" / s"$appIdentifier.plist"
-  val launchdBuildPath = appOutput / launchdPlistPath
-  val launchdInstallPath = (Paths get "/") / launchdPlistPath
+  val rootPath = Paths get "/"
+//  val launchdInstallPath = rootPath / "Library" / "LaunchDaemons" / s"$appIdentifier.plist"
+//  val launchdBuildPath = appOutput / (rootPath relativize launchdInstallPath)
 
   def macPackage(): Path = {
     AppBundler.delete(appOutput)
     Files.createDirectories(appOutput)
-    Files.createDirectories(launchdBuildPath.getParent)
     Distribution.writeDistribution(DistributionConf(appIdentifier, displayName, name), distributionFile)
     Files.createDirectories(resourcesDir)
-    //    AppBundler.copyFileOrResource(welcomeHtml, "welcome.html", resourcesDir / "welcome.html")
-    //    AppBundler.copyFileOrResource(licenseHtml, "license.html", resourcesDir / "license.html")
-    //    AppBundler.copyFileOrResource(conclusionHtml, "conclusion.html", resourcesDir / "conclusion.html")
     Files.createDirectories(scriptsDir)
     launchdConf.foreach(launchd => {
+      val launchdInstallPath = launchd.plistDir / s"$appIdentifier.plist"
+      val launchdBuildPath = appOutput / (rootPath relativize launchdInstallPath)
       Files.createDirectories(launchdBuildPath.getParent)
       launchd.write(launchdBuildPath)
       writePreInstall(appIdentifier, launchdInstallPath, scriptsDir / "preinstall")
