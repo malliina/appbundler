@@ -39,7 +39,7 @@ class PathTests extends FunSuite {
 //    println(paths.mkString(Platform.EOL))
 //  }
   test("java_home script") {
-    val out = Process("/usr/libexec/java_home").lineStream.head
+    val out = Process("/usr/libexec/java_home").lines.head
     println(out)
   }
 }
