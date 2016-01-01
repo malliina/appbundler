@@ -1,12 +1,12 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
 import java.io.{BufferedOutputStream, FileOutputStream}
 import java.net.URL
 import java.nio.file._
 import java.util.zip.ZipInputStream
 
-import com.mle.file.{FileUtilities, StorageFile}
-import com.mle.util.Util
+import com.malliina.file.{FileUtilities, StorageFile}
+import com.malliina.util.Util
 
 import scala.sys.process.Process
 

@@ -2,7 +2,7 @@ package tests
 
 import java.nio.file.{Files, Paths}
 
-import com.mle.appbundler.{AppBundler, IncludeConf}
+import com.malliina.appbundler.{IncludeConf, AppBundler}
 import org.scalatest.FunSuite
 
 /**

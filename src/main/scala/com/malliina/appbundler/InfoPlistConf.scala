@@ -1,8 +1,8 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
 import java.nio.file.{Path, Paths}
 
-import com.mle.appbundler.InfoPlistConf.{DEFAULT_EXECUTABLE_NAME, DEFAULT_JAVA}
+import com.malliina.appbundler.InfoPlistConf.{DEFAULT_EXECUTABLE_NAME, DEFAULT_JAVA}
 
 /**
  * @author mle

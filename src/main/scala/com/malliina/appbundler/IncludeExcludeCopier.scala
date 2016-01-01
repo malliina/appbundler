@@ -1,8 +1,8 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
 import java.nio.file._
 
-import com.mle.file.StorageFile
+import com.malliina.file.StorageFile
 
 /**
  * @author Michael

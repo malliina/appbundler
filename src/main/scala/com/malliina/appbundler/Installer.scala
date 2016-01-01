@@ -1,9 +1,9 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
-import com.mle.file.{FileUtilities, StorageFile}
-import com.mle.util.Log
+import com.malliina.file.{FileUtilities, StorageFile}
+import com.malliina.util.Log
 
 /**
  * To create a .pkg package of your app, run `macPackage()`.

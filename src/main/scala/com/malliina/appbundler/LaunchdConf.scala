@@ -1,12 +1,11 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
-import java.nio.file.{Paths, Path}
+import java.nio.file.{Path, Paths}
 
-import com.mle.appbundler.LaunchdConf.{KeepAliveOption, OnDemand, DEFAULT_PLIST_DIR}
-import com.mle.appbundler.PlistWriter._
+import com.malliina.appbundler.LaunchdConf.{DEFAULT_PLIST_DIR, KeepAliveOption, OnDemand}
+import com.malliina.appbundler.PlistWriter.{booleanDict, dictionary, optionalProperty, plistXml, toArray, toBool, toProperty}
 
 import scala.xml.Node
-
 
 /**
  * @author Michael

@@ -1,6 +1,6 @@
 package tests
 
-import com.mle.util.Util
+import com.malliina.util.Util
 import org.scalatest.FunSuite
 
 /**

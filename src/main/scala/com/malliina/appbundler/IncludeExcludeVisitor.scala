@@ -1,4 +1,4 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{FileVisitResult, Path, SimpleFileVisitor}

@@ -1,9 +1,9 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
 import java.nio.file.Path
 
-import com.mle.file.FileUtilities
-import com.mle.util.Log
+import com.malliina.file.FileUtilities
+import com.malliina.util.Log
 
 import scala.xml.{Node, PrettyPrinter}
 

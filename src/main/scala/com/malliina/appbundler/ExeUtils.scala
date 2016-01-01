@@ -1,12 +1,10 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
 import java.nio.file.Path
 
 import org.slf4j.Logger
 
-import scala.sys.process.Process
-import scala.sys.process.ProcessBuilder
-
+import scala.sys.process.{Process, ProcessBuilder}
 
 /**
  * @author Michael
@@ -38,4 +36,3 @@ object ExeUtils {
     stream.foreach(line => logger.info(line))
   }
 }
-

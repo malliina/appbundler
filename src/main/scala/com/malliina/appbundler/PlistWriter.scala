@@ -1,18 +1,16 @@
-package com.mle.appbundler
+package com.malliina.appbundler
 
 import java.nio.file.Path
 
-import com.mle.file.FileUtilities
-
-import scala.xml.dtd.{DocType, PublicID}
 import scala.xml._
+import scala.xml.dtd.{DocType, PublicID}
 
 /**
  * Do not format this document with IntelliJ IDEA.
  *
  * @author Michael
  */
-object PlistWriter extends XmlWriter{
+object PlistWriter extends XmlWriter {
 //  val PLIST_DTD = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
   val docType = DocType("plist", PublicID("-//Apple//DTD PLIST 1.0//EN", "http://www.apple.com/DTDs/PropertyList-1.0.dtd"), Nil)
 

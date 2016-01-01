@@ -1,6 +1,6 @@
 # appbundler #
 
-A work in progress port of Oracle's appbundler for OSX.
+A port of Oracle's appbundler for OSX.
 
 For SBT integration, see [sbt-packager](https://github.com/malliina/sbt-packager).
 
@@ -14,7 +14,7 @@ For SBT integration, see [sbt-packager](https://github.com/malliina/sbt-packager
 ## Installation ##
 
 ```
-"com.github.malliina" %% "appbundler" % "0.8.1"
+"com.malliina" %% "appbundler" % "0.9.0"
 ```
 
 ## Usage ##
@@ -23,14 +23,14 @@ First, create an `InfoPlistConf` instance representing your app:
 
 ```
 import java.nio.file.{Path, Paths}
-import com.mle.appbundler.{InfoPlistConf, Installer}
+import com.malliina.appbundler.{InfoPlistConf, Installer}
 
 val plist = InfoPlistConf(
   displayName = "My App",
   name = "myapp",
-  identifier = "com.github.malliina.myapp",
+  identifier = "com.malliina.myapp",
   version = "0.0.1",
-  mainClass = "com.github.malliina.myapp.Start",
+  mainClass = "com.malliina.myapp.Start",
   jars = Seq("myapp.jar", "lib.jar", "other_lib.jar") map (jar => Paths.get(jar))
 )
 ```
