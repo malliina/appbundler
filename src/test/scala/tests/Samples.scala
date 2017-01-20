@@ -6,11 +6,8 @@ import com.malliina.appbundler.{LaunchdConf, InfoPlistConf}
 import com.malliina.appbundler.Installer
 import org.scalatest.FunSuite
 
-/**
- * @author Michael
- */
 class Samples extends FunSuite {
-  test("can create installer") {
+  ignore("can create installer") {
     val outDir: Path = ???
     val plist = InfoPlistConf(
       displayName = "My App",
