@@ -9,7 +9,6 @@ object AppBundlerBuild {
     .settings(projectSettings: _*)
 
   lazy val projectSettings = Seq(
-    version := "0.9.3",
     gitUserName := "malliina",
     developerName := "Michael Skogberg",
     organization := "com.malliina",
