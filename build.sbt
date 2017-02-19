@@ -1,1 +1,1 @@
-lazy val appBundler = AppBundlerBuild.appBundler
+lazy val p = AppBundlerBuild.p
