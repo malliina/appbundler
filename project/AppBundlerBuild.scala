@@ -14,9 +14,8 @@ object AppBundlerBuild {
     organization := "com.malliina",
     scalaVersion := "2.11.8",
     crossScalaVersions := Seq("2.10.6", scalaVersion.value),
-    libraryDependencies ++= Seq(
-      "com.malliina" %% "util" % "2.2.3"
-    ),
+    resolvers += Resolver.bintrayRepo("malliina", "maven"),
+    libraryDependencies += "com.malliina" %% "util" % "2.2.3",
     libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, minor)) if minor >= 11 =>
