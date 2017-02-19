@@ -1,21 +1,30 @@
-import com.malliina.sbtutils.{SbtProjects, SbtUtils}
+import com.malliina.sbtutils.SbtProjects
+import com.malliina.sbtutils.SbtUtils.{developerName, gitUserName}
 import sbt.Keys._
 import sbt._
 
 object AppBundlerBuild {
 
-  lazy val p = SbtProjects.mavenPublishProject("appbundler")
+  lazy val appBundler = SbtProjects.mavenPublishProject("appbundler")
     .settings(projectSettings: _*)
 
   lazy val projectSettings = Seq(
-    version := "0.9.2",
-    SbtUtils.gitUserName := "malliina",
-    SbtUtils.developerName := "Michael Skogberg",
+    version := "0.9.3",
+    gitUserName := "malliina",
+    developerName := "Michael Skogberg",
     organization := "com.malliina",
     scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.10.6", scalaVersion.value),
     libraryDependencies ++= Seq(
-      "com.malliina" %% "util" % "2.5.0",
-      "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
-    )
+      "com.malliina" %% "util" % "2.2.3"
+    ),
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, minor)) if minor >= 11 =>
+          Seq("org.scala-lang.modules" %% "scala-xml" % "1.0.6")
+        case _ =>
+          Nil
+      }
+    }
   )
 }
