@@ -6,9 +6,6 @@ import org.slf4j.Logger
 
 import scala.sys.process.{Process, ProcessBuilder}
 
-/**
- * @author Michael
- */
 object ExeUtils {
 
   def executeRedirected(cmd: Seq[String], redir: Path, logger: Logger): Unit = {

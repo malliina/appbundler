@@ -10,10 +10,9 @@ import com.malliina.util.Util
 
 import scala.sys.process.Process
 
-/**
- * Port of Oracle's AppBundlerTask.java.
- *
- */
+/** Port of Oracle's AppBundlerTask.java.
+  *
+  */
 object AppBundler {
   val DEFAULT_ICON_NAME = "GenericApp.icns"
   val OS_TYPE_CODE = "APPL"
@@ -40,12 +39,12 @@ object AppBundler {
   def toPath(p: String): Path = Paths.get(p)
 
   /**
-   * Builds a .app package in the output directory.
-   *
-   * @param infoPlistConf app conf
-   * @param dest root dest path
-   * @return path to DisplayName.app
-   */
+    * Builds a .app package in the output directory.
+    *
+    * @param infoPlistConf app conf
+    * @param dest          root dest path
+    * @return path to DisplayName.app
+    */
   def createBundle(infoPlistConf: InfoPlistConf, dest: Path): Path = {
     val conf = BundleStructure(infoPlistConf.displayName, dest)
     conf.prepare()
@@ -68,10 +67,10 @@ object AppBundler {
   }
 
   /**
-   * I do not understand what this is.
-   *
-   * @param dest resources destination
-   */
+    * I do not understand what this is.
+    *
+    * @param dest resources destination
+    */
   private def copyResources(dest: Path) = {
     val res = "res.zip"
     Option(getClass.getResourceAsStream(res)).foreach(stream => {
@@ -93,11 +92,11 @@ object AppBundler {
   }
 
   /**
-   *
-   * @param javaHome the source: something like /Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home
-   * @param plugInsDir destination
-   * @return
-   */
+    *
+    * @param javaHome   the source: something like /Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home
+    * @param plugInsDir destination
+    * @return
+    */
   def copyRuntime(javaHome: Path, plugInsDir: Path) = {
     val javaHomeDir = resolveJavaDirectory(javaHome)
     val javaContentsDir = javaHomeDir.getParent
@@ -118,16 +117,16 @@ object AppBundler {
   }
 
   /**
-   * Converts `javaHome` to a jdk/Contents/Home path.
-   *
-   * Parameter `javaHome` may be any of the following:
-   * a) a script that returns the directory, like /usr/libexec/java_home
-   * b) a jdk8 dir
-   * c) a jdk8/Contents/Home dir
-
-   * @param javaHome a valid java home path, or `javaHome`
-   * @return
-   */
+    * Converts `javaHome` to a jdk/Contents/Home path.
+    *
+    * Parameter `javaHome` may be any of the following:
+    * a) a script that returns the directory, like /usr/libexec/java_home
+    * b) a jdk8 dir
+    * c) a jdk8/Contents/Home dir
+    *
+    * @param javaHome a valid java home path, or `javaHome`
+    * @return
+    */
   def resolveJavaDirectory(javaHome: Path): Path =
     if (!Files.isDirectory(javaHome) && Files.isExecutable(javaHome)) {
       Paths get Process(javaHome.toString).lines.head
@@ -157,12 +156,12 @@ object AppBundler {
   }
 
   /**
-   * Copies `file` to `dest` if defined, otherwise copies the resource at `orElseResource` to `dest`.
-   *
-   * @param file optional file
-   * @param orElseResource fallback resource
-   * @param dest destination file
-   */
+    * Copies `file` to `dest` if defined, otherwise copies the resource at `orElseResource` to `dest`.
+    *
+    * @param file           optional file
+    * @param orElseResource fallback resource
+    * @param dest           destination file
+    */
   def copyFileOrResource(file: Option[Path], orElseResource: String, dest: Path) =
     file.fold(copyResource(orElseResource, dest))(f => copy(f, dest))
 

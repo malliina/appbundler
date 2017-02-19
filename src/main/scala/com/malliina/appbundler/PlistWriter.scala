@@ -7,8 +7,6 @@ import scala.xml.dtd.{DocType, PublicID}
 
 /**
  * Do not format this document with IntelliJ IDEA.
- *
- * @author Michael
  */
 object PlistWriter extends XmlWriter {
 //  val PLIST_DTD = "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"

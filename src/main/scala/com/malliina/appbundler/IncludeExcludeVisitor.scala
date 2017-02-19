@@ -3,9 +3,6 @@ package com.malliina.appbundler
 import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file.{FileVisitResult, Path, SimpleFileVisitor}
 
-/**
-  * @author mle
-  */
 abstract class IncludeExcludeVisitor(conf: IncludeConf) extends SimpleFileVisitor[Path] {
    val src = conf.src
    val dest = conf.dest

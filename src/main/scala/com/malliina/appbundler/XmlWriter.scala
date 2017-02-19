@@ -2,15 +2,12 @@ package com.malliina.appbundler
 
 import java.nio.file.Path
 
+import com.malliina.appbundler.XmlWriter.log
 import com.malliina.file.FileUtilities
-import com.malliina.util.Log
+import org.slf4j.LoggerFactory
 
 import scala.xml.{Node, PrettyPrinter}
-
-/**
- * @author Michael
- */
-trait XmlWriter extends Log{
+trait XmlWriter {
   def prefix: String = decl()
 
   def decl(enc: String = "UTF-8") = s"<?xml version='1.0' encoding='$enc'?>\n"
@@ -25,4 +22,8 @@ trait XmlWriter extends Log{
     val payload = printer format xml
     prefix + payload
   }
+}
+
+object XmlWriter {
+  private val log = LoggerFactory.getLogger(getClass.getName.stripSuffix("$"))
 }

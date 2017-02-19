@@ -5,18 +5,17 @@ import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 import com.malliina.file.{FileUtilities, StorageFile}
 import com.malliina.util.Log
 
-/**
- * To create a .pkg package of your app, run `macPackage()`.
- *
- * @param rootOutput out dir
- * @param infoPlistConf
- * @param launchdConf
- * @param additionalDmgFiles files to include in the image, such as .DS_Store for styling and a .background
- * @param welcomeHtml wip
- * @param licenseHtml wip
- * @param conclusionHtml wip
- * @param deleteOutOnComplete
- */
+/** To create a .pkg package of your app, run `macPackage()`.
+  *
+  * @param rootOutput         out dir
+  * @param infoPlistConf
+  * @param launchdConf
+  * @param additionalDmgFiles files to include in the image, such as .DS_Store for styling and a .background
+  * @param welcomeHtml        wip
+  * @param licenseHtml        wip
+  * @param conclusionHtml     wip
+  * @param deleteOutOnComplete
+  */
 case class Installer(rootOutput: Path,
                      infoPlistConf: InfoPlistConf,
                      launchdConf: Option[LaunchdConf] = None,
@@ -40,8 +39,8 @@ case class Installer(rootOutput: Path,
   val packageFile = dmgSourceDir / s"Install $displayName.pkg"
   val dmgFile = rootOutput / s"$name-$version.dmg"
   val rootPath = Paths get "/"
-//  val launchdInstallPath = rootPath / "Library" / "LaunchDaemons" / s"$appIdentifier.plist"
-//  val launchdBuildPath = appOutput / (rootPath relativize launchdInstallPath)
+  //  val launchdInstallPath = rootPath / "Library" / "LaunchDaemons" / s"$appIdentifier.plist"
+  //  val launchdBuildPath = appOutput / (rootPath relativize launchdInstallPath)
 
   def macPackage(): Path = {
     AppBundler.delete(appOutput)
@@ -70,10 +69,10 @@ case class Installer(rootOutput: Path,
     execute(productBuild)
 
     /**
-     * If the out directory used to build the .pkg is not deleted, the app will fail to install properly on the
-     * development machine. I don't know why, I suspect I'm doing something wrong, but deleting the directory is a
-     * workaround.
-     */
+      * If the out directory used to build the .pkg is not deleted, the app will fail to install properly on the
+      * development machine. I don't know why, I suspect I'm doing something wrong, but deleting the directory is a
+      * workaround.
+      */
     if (deleteOutOnComplete) {
       AppBundler.delete(appOutput)
     }
@@ -83,9 +82,9 @@ case class Installer(rootOutput: Path,
   }
 
   /**
-   *
-   * @return the built .dmg file
-   */
+    *
+    * @return the built .dmg file
+    */
   def dmgPackage(): Path = buildDmg(macPackage(), displayName, dmgFile)
 
   def buildDmg(pkgFile: Path, displayName: String, outFile: Path) = {
@@ -134,12 +133,12 @@ case class Installer(rootOutput: Path,
   )
 
   /**
-   * Sets icon `icon` to file `file`.
-   *
-   * @param icon icon file
-   * @param file target file
-   * @see http://apple.stackexchange.com/questions/6901/how-can-i-change-a-file-or-folder-icon-using-the-terminal
-   */
+    * Sets icon `icon` to file `file`.
+    *
+    * @param icon icon file
+    * @param file target file
+    * @see http://apple.stackexchange.com/questions/6901/how-can-i-change-a-file-or-folder-icon-using-the-terminal
+    */
   def iconify(icon: Path, file: Path) = {
     val iconStr = icon.toString
     val fileStr = file.toString
@@ -156,10 +155,10 @@ case class Installer(rootOutput: Path,
   }
 
   /**
-   * A command that, when run, hides the extension of `file`.
-   *
-   * @return a command
-   */
+    * A command that, when run, hides the extension of `file`.
+    *
+    * @return a command
+    */
   def hideExtension(file: Path) = Seq(
     "/usr/bin/SetFile",
     "-a",
@@ -168,13 +167,13 @@ case class Installer(rootOutput: Path,
   )
 
   /**
-   * A command that creates a volume named `volumeName` of the contents in `sourceDir`.
-   *
-   * @param volumeName name of volume
-   * @param sourceDir source dir
-   * @param dmgOutFile output .dmg file
-   * @return a command
-   */
+    * A command that creates a volume named `volumeName` of the contents in `sourceDir`.
+    *
+    * @param volumeName name of volume
+    * @param sourceDir  source dir
+    * @param dmgOutFile output .dmg file
+    * @return a command
+    */
   def hdiutil(volumeName: String, sourceDir: Path, dmgOutFile: Path) = Seq(
     "/usr/bin/hdiutil",
     "create",
@@ -189,17 +188,17 @@ case class Installer(rootOutput: Path,
   def writePreInstall(identifier: String, launchPlist: Path, buildDest: Path) =
     scriptify(buildDest) {
       s"""#!/bin/sh
-        |set -e
-        |if /bin/launchctl list "$identifier" &> /dev/null; then
-        |    /bin/launchctl unload "$launchPlist"
-        |fi"""
+         |set -e
+         |if /bin/launchctl list "$identifier" &> /dev/null; then
+         |    /bin/launchctl unload "$launchPlist"
+         |fi"""
     }
 
   def writePostInstall(launchPlist: Path, buildDest: Path) =
     scriptify(buildDest) {
       s"""#!/bin/sh
-        |set -e
-        |/bin/launchctl load "$launchPlist"
+         |set -e
+         |/bin/launchctl load "$launchPlist"
       """
     }
 

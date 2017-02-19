@@ -4,9 +4,6 @@ import java.nio.file.Path
 
 import scala.xml.Node
 
-/**
- * @author Michael
- */
 object Distribution extends XmlWriter {
 
   def writeDistribution(conf: DistributionConf, dest: Path) = writePretty(xml(conf), dest)

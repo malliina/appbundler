@@ -7,9 +7,6 @@ import com.malliina.appbundler.PlistWriter.{booleanDict, dictionary, optionalPro
 
 import scala.xml.Node
 
-/**
- * @author Michael
- */
 case class LaunchdConf(label: String,
                        programArguments: Seq[String],
                        keepAlive: KeepAliveOption = OnDemand,

@@ -4,9 +4,6 @@ import java.nio.file._
 
 import com.malliina.file.StorageFile
 
-/**
- * @author Michael
- */
 class IncludeExcludeCopier(conf: IncludeConf) extends IncludeExcludeVisitor(conf) {
 
   override def onSuccess(path: Path): Unit = {

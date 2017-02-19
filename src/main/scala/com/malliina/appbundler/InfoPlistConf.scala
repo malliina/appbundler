@@ -4,9 +4,6 @@ import java.nio.file.{Path, Paths}
 
 import com.malliina.appbundler.InfoPlistConf.{DEFAULT_EXECUTABLE_NAME, DEFAULT_JAVA}
 
-/**
- * @author mle
- */
 case class InfoPlistConf(displayName: String,
                          name: String,
                          identifier: String,
