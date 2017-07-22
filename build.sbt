@@ -8,6 +8,7 @@ developerName := "Michael Skogberg"
 organization := "com.malliina"
 scalaVersion := "2.12.2"
 crossScalaVersions := Seq("2.10.6", "2.11.11", scalaVersion.value)
+releaseCrossBuild := true
 resolvers += Resolver.bintrayRepo("malliina", "maven")
 libraryDependencies += "com.malliina" %% "util" % "2.6.0"
 libraryDependencies ++= {

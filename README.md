@@ -16,7 +16,7 @@ For SBT integration, see [sbt-packager](https://github.com/malliina/sbt-packager
 
 ## Installation
 
-    "com.malliina" %% "appbundler" % "0.9.0"
+    "com.malliina" %% "appbundler" % "1.0.1"
 
 ## Usage
 
