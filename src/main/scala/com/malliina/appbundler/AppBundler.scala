@@ -1,12 +1,9 @@
 package com.malliina.appbundler
 
-import java.io.{BufferedOutputStream, FileOutputStream}
+import java.io._
 import java.net.URL
 import java.nio.file._
 import java.util.zip.ZipInputStream
-
-import com.malliina.file.{FileUtilities, StorageFile}
-import com.malliina.util.Util
 
 import scala.sys.process.Process
 
@@ -66,29 +63,28 @@ object AppBundler {
     exeFile.setExecutable(true, false)
   }
 
-  /**
-    * I do not understand what this is.
+  /** I do not understand what this is.
     *
     * @param dest resources destination
     */
   private def copyResources(dest: Path) = {
     val res = "res.zip"
-    Option(getClass.getResourceAsStream(res)).foreach(stream => {
-      Util.using(new ZipInputStream(stream))(zipInStream => {
-        Iterator.continually(zipInStream.getNextEntry).takeWhile(_ != null).foreach(zipEntry => {
+    Option(getClass.getResourceAsStream(res)).foreach { stream =>
+      using(new ZipInputStream(stream)) { zipInStream =>
+        Iterator.continually(zipInStream.getNextEntry).takeWhile(_ != null).foreach { zipEntry =>
           val file = dest / zipEntry.getName
           if (zipEntry.isDirectory) {
             Files.createDirectories(file)
           } else {
             val outStream = new BufferedOutputStream(new FileOutputStream(file.toFile), BUFFER_SIZE)
-            Util.using(outStream)(str => {
+            using(outStream) { str =>
               Iterator.continually(zipInStream.read()).takeWhile(_ != -1).foreach(b => outStream.write(b))
               outStream.flush()
-            })
+            }
           }
-        })
-      })
-    })
+        }
+      }
+    }
   }
 
   /**
@@ -141,13 +137,12 @@ object AppBundler {
       }
     }
 
-  def copyClassPath(jars: Seq[Path], dest: Path) = {
-    jars.foreach(jar => {
+  def copyClassPath(jars: Seq[Path], dest: Path) =
+    jars.foreach { jar =>
       copy(jar, dest / jar.getFileName)
-    })
-  }
+    }
 
-  def writePkgInfo(signature: String, dest: Path) = FileUtilities.writerTo(dest)(_.println(s"$OS_TYPE_CODE$signature"))
+  def writePkgInfo(signature: String, dest: Path) = writerTo(dest)(_.println(s"$OS_TYPE_CODE$signature"))
 
   class Copier(conf: IncludeConf) extends IncludeExcludeVisitor(conf) {
     override def onSuccess(path: Path): Unit = {
@@ -168,18 +163,19 @@ object AppBundler {
   def copyResourceSameName(resName: String, destDir: Path) =
     copyResource(resName, destDir / Paths.get(resName).getFileName)
 
-  def copyResource(resName: String, dest: Path) = copy(Util.resource(resName), dest)
+  def copyResource(resName: String, dest: Path) = copy(resource(resName), dest)
 
-  def copy(url: URL, dest: Path): Unit = {
-    Util.using(url.openStream())(stream => Files.copy(stream, dest, StandardCopyOption.REPLACE_EXISTING))
-  }
+  def copy(url: URL, dest: Path): Unit =
+    using(url.openStream()) { stream =>
+      Files.copy(stream, dest, StandardCopyOption.REPLACE_EXISTING)
+    }
 
   def copy(source: Path, dest: Path): Unit = {
-    Option(dest.getParent).foreach(d => {
+    Option(dest.getParent).foreach { d =>
       if (!Files.isDirectory(d)) {
         Files.createDirectories(d)
       }
-    })
+    }
     Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
   }
 
@@ -191,4 +187,16 @@ object AppBundler {
       Files.delete(file)
     }
   }
+
+  def resource(resource: String): URL = obtainResource(resource, _.getResource)
+
+  def obtainResource[T](resource: String, getter: ClassLoader => String => T): T =
+    Option(getter(getClass.getClassLoader)(resource))
+      .getOrElse(throw new Exception(s"Unable to locate resource: '$resource'."))
+
+  def writerTo(filename: Path)(op: PrintWriter => Unit): Unit =
+    using(new PrintWriter(new BufferedWriter(new FileWriter(filename.toFile))))(op)
+
+  def using[T <: AutoCloseable, U](resource: T)(op: T => U): U =
+    try op(resource) finally resource.close()
 }

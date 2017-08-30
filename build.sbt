@@ -6,11 +6,11 @@ lazy val appBundler = SbtProjects.mavenPublishProject("appbundler")
 gitUserName := "malliina"
 developerName := "Michael Skogberg"
 organization := "com.malliina"
-scalaVersion := "2.12.2"
+scalaVersion := "2.12.3"
 crossScalaVersions := Seq("2.10.6", "2.11.11", scalaVersion.value)
 releaseCrossBuild := true
 resolvers += Resolver.bintrayRepo("malliina", "maven")
-libraryDependencies += "com.malliina" %% "util" % "2.6.0"
+libraryDependencies ++= Seq("com.malliina" %% "primitives" % "1.3.2", "org.slf4j" % "slf4j-api" % "1.7.25")
 libraryDependencies ++= {
   CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, minor)) if minor >= 11 =>

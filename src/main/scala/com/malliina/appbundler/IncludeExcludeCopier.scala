@@ -1,8 +1,6 @@
 package com.malliina.appbundler
 
-import java.nio.file._
-
-import com.malliina.file.StorageFile
+import java.nio.file.{Files, Path, StandardCopyOption}
 
 class IncludeExcludeCopier(conf: IncludeConf) extends IncludeExcludeVisitor(conf) {
 
@@ -11,4 +9,3 @@ class IncludeExcludeCopier(conf: IncludeConf) extends IncludeExcludeVisitor(conf
     Files.copy(path, pathDest, StandardCopyOption.REPLACE_EXISTING)
   }
 }
-

@@ -2,19 +2,12 @@ package com.malliina.appbundler
 
 import java.nio.file.{Files, Path, Paths, StandardCopyOption}
 
-import com.malliina.file.{FileUtilities, StorageFile}
-import com.malliina.util.Log
+import org.slf4j.LoggerFactory
 
 /** To create a .pkg package of your app, run `macPackage()`.
   *
   * @param rootOutput         out dir
-  * @param infoPlistConf
-  * @param launchdConf
   * @param additionalDmgFiles files to include in the image, such as .DS_Store for styling and a .background
-  * @param welcomeHtml        wip
-  * @param licenseHtml        wip
-  * @param conclusionHtml     wip
-  * @param deleteOutOnComplete
   */
 case class Installer(rootOutput: Path,
                      infoPlistConf: InfoPlistConf,
@@ -24,7 +17,8 @@ case class Installer(rootOutput: Path,
                      welcomeHtml: Option[Path] = None,
                      licenseHtml: Option[Path] = None,
                      conclusionHtml: Option[Path] = None,
-                     deleteOutOnComplete: Boolean = true) extends Log {
+                     deleteOutOnComplete: Boolean = true) {
+  private val log = LoggerFactory.getLogger(getClass.getName.stripSuffix("$"))
   val appOutput = rootOutput / "out"
   val applicationsDir = appOutput / "Applications"
   val displayName = infoPlistConf.displayName
@@ -77,7 +71,6 @@ case class Installer(rootOutput: Path,
       AppBundler.delete(appOutput)
     }
     iconFile.foreach(i => iconify(i, packageFile))
-    log info s"Created $packageFile."
     packageFile
   }
 
@@ -89,12 +82,12 @@ case class Installer(rootOutput: Path,
 
   def buildDmg(pkgFile: Path, displayName: String, outFile: Path) = {
     val dmgRoot = pkgFile.getParent
-    val absolutes = additionalDmgFiles.map(fm => fm.copy(after = dmgRoot / fm.after))
-    absolutes.foreach(fm => {
+    val absolutes = additionalDmgFiles.map { fm => fm.copy(after = dmgRoot / fm.after) }
+    absolutes.foreach { fm =>
       val dest = fm.after
       Option(dest.getParent).foreach(d => Files.createDirectories(d))
       Files.copy(fm.before, dest, StandardCopyOption.REPLACE_EXISTING)
-    })
+    }
     // hides the extension of the files in the .dmg image when opened in Finder
     (pkgFile +: absolutes.map(_.after)).map(hideExtension).foreach(execute)
     // runs hdiutil
@@ -203,7 +196,7 @@ case class Installer(rootOutput: Path,
     }
 
   def scriptify(buildDest: Path)(f: => String) = {
-    FileUtilities.writerTo(buildDest)(w => w.println(f.stripMargin))
+    AppBundler.writerTo(buildDest)(w => w.println(f.stripMargin))
     buildDest.toFile.setExecutable(true, false)
   }
 
