@@ -28,7 +28,7 @@ object ExeUtils {
   }
 
   def runLogged(pb: ProcessBuilder, logger: Logger) = {
-    val stream = pb.lines
+    val stream = pb.lineStream
     stream.foreach(line => logger.info(line))
   }
 }
