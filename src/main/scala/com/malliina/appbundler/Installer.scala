@@ -33,8 +33,6 @@ case class Installer(rootOutput: Path,
   val packageFile = dmgSourceDir / s"Install $displayName.pkg"
   val dmgFile = rootOutput / s"$name-$version.dmg"
   val rootPath = Paths get "/"
-  //  val launchdInstallPath = rootPath / "Library" / "LaunchDaemons" / s"$appIdentifier.plist"
-  //  val launchdBuildPath = appOutput / (rootPath relativize launchdInstallPath)
 
   def macPackage(): Path = {
     AppBundler.delete(appOutput)
@@ -51,9 +49,6 @@ case class Installer(rootOutput: Path,
       writePostInstall(launchdInstallPath, scriptsDir / "postinstall")
     })
     AppBundler.createBundle(infoPlistConf, applicationsDir)
-    //      val bundle = macAppDir
-    //      val cmd = Seq("/usr/bin/SetFile", "-a", "B", bundle.toString)
-    //      ExeUtils.execute(cmd, log)
     // runs pkgbuild
     Files.createDirectories(pkgDir)
     execute(pkgBuild)
@@ -125,8 +120,7 @@ case class Installer(rootOutput: Path,
     packageFile.toString
   )
 
-  /**
-    * Sets icon `icon` to file `file`.
+  /** Sets icon `icon` to file `file`.
     *
     * @param icon icon file
     * @param file target file
@@ -147,8 +141,7 @@ case class Installer(rootOutput: Path,
     Seq(rez, setIcon).foreach(execute)
   }
 
-  /**
-    * A command that, when run, hides the extension of `file`.
+  /** A command that, when run, hides the extension of `file`.
     *
     * @return a command
     */
@@ -159,8 +152,7 @@ case class Installer(rootOutput: Path,
     file.toString
   )
 
-  /**
-    * A command that creates a volume named `volumeName` of the contents in `sourceDir`.
+  /** A command that creates a volume named `volumeName` of the contents in `sourceDir`.
     *
     * @param volumeName name of volume
     * @param sourceDir  source dir
