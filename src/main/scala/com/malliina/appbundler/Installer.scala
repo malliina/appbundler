@@ -40,14 +40,14 @@ case class Installer(rootOutput: Path,
     Distribution.writeDistribution(DistributionConf(appIdentifier, displayName, name), distributionFile)
     Files.createDirectories(resourcesDir)
     Files.createDirectories(scriptsDir)
-    launchdConf.foreach(launchd => {
+    launchdConf.foreach { launchd =>
       val launchdInstallPath = launchd.plistDir / s"$appIdentifier.plist"
       val launchdBuildPath = appOutput / (rootPath relativize launchdInstallPath)
       Files.createDirectories(launchdBuildPath.getParent)
       launchd.write(launchdBuildPath)
       writePreInstall(appIdentifier, launchdInstallPath, scriptsDir / "preinstall")
       writePostInstall(launchdInstallPath, scriptsDir / "postinstall")
-    })
+    }
     AppBundler.createBundle(infoPlistConf, applicationsDir)
     // runs pkgbuild
     Files.createDirectories(pkgDir)
@@ -129,15 +129,22 @@ case class Installer(rootOutput: Path,
   def iconify(icon: Path, file: Path) = {
     val iconStr = icon.toString
     val fileStr = file.toString
+    val icnsOut = "tmpicns.icns"
     val iconResource = Paths get "tmpicns.rsrc"
     val iconResourceStr = iconResource.toString
-    val sip = Seq("/usr/bin/sips", "-i", iconStr)
+
+    // https://apple.stackexchange.com/a/10783
+    val sipNew = Seq("/usr/bin/sips", "-s", "format", "icns", iconStr, "--out", icnsOut)
+    val iconSet = Seq("/usr/local/bin/seticon", "-d", icnsOut, iconStr)
+//    val sip = Seq("/usr/bin/sips", "-i", iconStr)
     val deRez = Seq("/usr/bin/DeRez", "-only", "icns", iconStr)
     val rez = Seq("/usr/bin/Rez", "-append", iconResourceStr, "-o", fileStr)
     val setIcon = Seq("/usr/bin/SetFile", "-a", "C", fileStr)
     Files.deleteIfExists(iconResource)
-    execute(sip)
+    execute(sipNew)
+    execute(iconSet)
     ExeUtils.executeRedirected(deRez, iconResource, log)
+//    execute(rez)
     Seq(rez, setIcon).foreach(execute)
   }
 
