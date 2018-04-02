@@ -6,12 +6,10 @@ lazy val appBundler = SbtProjects.mavenPublishProject("appbundler")
 gitUserName := "malliina"
 developerName := "Michael Skogberg"
 organization := "com.malliina"
-scalaVersion := "2.12.4"
-crossScalaVersions := Seq("2.11.11", scalaVersion.value)
-releaseCrossBuild := true
+scalaVersion := "2.12.5"
 resolvers += Resolver.bintrayRepo("malliina", "maven")
 libraryDependencies ++= Seq(
-  "com.malliina" %% "primitives" % "1.3.2",
+  "com.malliina" %% "primitives" % "1.5.0",
   "org.slf4j" % "slf4j-api" % "1.7.25"
 )
 libraryDependencies ++= {
