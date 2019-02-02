@@ -1,4 +1,4 @@
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.8"
 resolvers += Resolver.url("malliina bintray sbt", url("https://dl.bintray.com/malliina/sbt-plugins/"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("com.malliina" %% "sbt-utils" % "0.7.1")
+addSbtPlugin("com.malliina" %% "sbt-utils-maven" % "0.10.1")
