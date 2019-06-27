@@ -7,7 +7,6 @@ import org.slf4j.Logger
 import scala.sys.process.{Process, ProcessBuilder}
 
 object ExeUtils {
-
   def executeRedirected(cmd: Seq[String], redir: Path, logger: Logger): Unit = {
     import scala.sys.process._
     val processBuilder = cmd #> redir.toFile

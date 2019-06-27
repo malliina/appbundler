@@ -5,12 +5,9 @@ import java.net.URL
 import java.nio.file._
 import java.util.zip.ZipInputStream
 
-import scala.sys.process.Process
-
 /** Port of Oracle's AppBundlerTask.java.
-  *
   */
-object AppBundler {
+object AppBundler extends JavaResolver {
   val DEFAULT_ICON_NAME = "GenericApp.icns"
   val OS_TYPE_CODE = "APPL"
 
@@ -35,8 +32,7 @@ object AppBundler {
 
   def toPath(p: String): Path = Paths.get(p)
 
-  /**
-    * Builds a .app package in the output directory.
+  /** Builds a .app package in the output directory.
     *
     * @param infoPlistConf app conf
     * @param dest          root dest path
@@ -67,7 +63,7 @@ object AppBundler {
     *
     * @param dest resources destination
     */
-  private def copyResources(dest: Path) = {
+  private def copyResources(dest: Path): Unit = {
     val res = "res.zip"
     Option(getClass.getResourceAsStream(res)).foreach { stream =>
       using(new ZipInputStream(stream)) { zipInStream =>
@@ -77,7 +73,7 @@ object AppBundler {
             Files.createDirectories(file)
           } else {
             val outStream = new BufferedOutputStream(new FileOutputStream(file.toFile), BUFFER_SIZE)
-            using(outStream) { str =>
+            using(outStream) { _ =>
               Iterator.continually(zipInStream.read()).takeWhile(_ != -1).foreach(b => outStream.write(b))
               outStream.flush()
             }
@@ -112,37 +108,13 @@ object AppBundler {
     Files.walkFileTree(conf.src, new Copier(conf))
   }
 
-  /**
-    * Converts `javaHome` to a jdk/Contents/Home path.
-    *
-    * Parameter `javaHome` may be any of the following:
-    * a) a script that returns the directory, like /usr/libexec/java_home
-    * b) a jdk8 dir
-    * c) a jdk8/Contents/Home dir
-    *
-    * @param javaHome a valid java home path, or `javaHome`
-    * @return
-    */
-  def resolveJavaDirectory(javaHome: Path): Path =
-    if (!Files.isDirectory(javaHome) && Files.isExecutable(javaHome)) {
-      Paths get Process(javaHome.toString).lines.head
-    } else {
-      val expectedName = "Home"
-      if (javaHome.getFileName.toString != expectedName) {
-        val maybeHome = javaHome / "Contents" / expectedName
-        if (Files.isDirectory(maybeHome)) maybeHome
-        else javaHome
-      } else {
-        javaHome
-      }
-    }
-
   def copyClassPath(jars: Seq[Path], dest: Path) =
     jars.foreach { jar =>
       copy(jar, dest / jar.getFileName)
     }
 
-  def writePkgInfo(signature: String, dest: Path) = writerTo(dest)(_.println(s"$OS_TYPE_CODE$signature"))
+  def writePkgInfo(signature: String, dest: Path): Unit =
+    writerTo(dest)(_.println(s"$OS_TYPE_CODE$signature"))
 
   class Copier(conf: IncludeConf) extends IncludeExcludeVisitor(conf) {
     override def onSuccess(path: Path): Unit = {
@@ -150,8 +122,7 @@ object AppBundler {
     }
   }
 
-  /**
-    * Copies `file` to `dest` if defined, otherwise copies the resource at `orElseResource` to `dest`.
+  /** Copies `file` to `dest` if defined, otherwise copies the resource at `orElseResource` to `dest`.
     *
     * @param file           optional file
     * @param orElseResource fallback resource

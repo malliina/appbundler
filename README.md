@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/malliina/appbundler.svg?branch=master)](https://travis-ci.org/malliina/appbundler)
-[![Maven Central](https://img.shields.io/maven-central/v/com.malliina/appbundler_2.11.svg)]()
+[![Maven Central](https://img.shields.io/maven-central/v/com.malliina/appbundler_2.12.svg)]()
 
 # appbundler
 

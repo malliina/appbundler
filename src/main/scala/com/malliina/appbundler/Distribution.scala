@@ -6,7 +6,7 @@ import scala.xml.Node
 
 object Distribution extends XmlWriter {
 
-  def writeDistribution(conf: DistributionConf, dest: Path) = writePretty(xml(conf), dest)
+  def writeDistribution(conf: DistributionConf, dest: Path): Unit = writePretty(xml(conf), dest)
 
   /**
    * Modified from the web, TODO add link.
