@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/malliina/appbundler.svg?branch=master)](https://travis-ci.org/malliina/appbundler)
-[![Maven Central](https://img.shields.io/maven-central/v/com.malliina/appbundler_2.12.svg)]()
+[![Build Status](https://github.com/malliina/appbundler/workflows/Test/badge.svg)](https://github.com/malliina/appbundler)
+[![Maven Central](https://img.shields.io/maven-central/v/com.malliina/appbundler_2.12.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.malliina%22%20AND%20a%3A%22appbundler_2.13%22)
 
 # appbundler
 
@@ -16,7 +16,7 @@ For SBT integration, see [sbt-packager](https://github.com/malliina/sbt-packager
 
 ## Installation
 
-    "com.malliina" %% "appbundler" % "1.4.0"
+    "com.malliina" %% "appbundler" % "1.5.0"
 
 ## Usage
 

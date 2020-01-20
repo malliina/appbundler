@@ -9,9 +9,9 @@ val appBundler = Project("appbundler", file("."))
     releaseCrossBuild := true,
     resolvers += Resolver.bintrayRepo("malliina", "maven"),
     libraryDependencies ++= Seq(
-      "com.malliina" %% "primitives" % "1.12.3",
-      "org.slf4j" % "slf4j-api" % "1.7.29",
-      "org.scalatest" %% "scalatest" % "3.1.0" % Test
+      "com.malliina" %% "primitives" % "1.13.0",
+      "org.slf4j" % "slf4j-api" % "1.7.30",
+      "org.scalatest" %% "scalatest" % "3.0.8" % Test
     ),
     libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
