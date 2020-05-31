@@ -4,21 +4,15 @@ val appBundler = Project("appbundler", file("."))
     gitUserName := "malliina",
     developerName := "Michael Skogberg",
     organization := "com.malliina",
-    scalaVersion := "2.13.1",
+    scalaVersion := "2.13.2",
     crossScalaVersions := Seq("2.12.10", scalaVersion.value),
     releaseCrossBuild := true,
     resolvers += Resolver.bintrayRepo("malliina", "maven"),
     libraryDependencies ++= Seq(
-      "com.malliina" %% "primitives" % "1.13.0",
+      "com.malliina" %% "primitives" % "1.17.0",
       "org.slf4j" % "slf4j-api" % "1.7.30",
-      "org.scalatest" %% "scalatest" % "3.0.8" % Test
+      "org.scala-lang.modules" %% "scala-xml" % "1.3.0",
+      "org.scalameta" %% "munit" % "0.7.7" % Test
     ),
-    libraryDependencies ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, minor)) if minor >= 11 =>
-          Seq("org.scala-lang.modules" %% "scala-xml" % "1.2.0")
-        case _ =>
-          Nil
-      }
-    }
+    testFrameworks += new TestFramework("munit.Framework")
   )

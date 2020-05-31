@@ -3,10 +3,9 @@ package tests
 import java.nio.file.{Path, Paths}
 
 import com.malliina.appbundler.{InfoPlistConf, Installer, LaunchdConf}
-import org.scalatest.FunSuite
 
-class Samples extends FunSuite {
-  ignore("can create installer") {
+class Samples extends munit.FunSuite {
+  test("can create installer".ignore) {
     val outDir: Path = ???
     val plist = InfoPlistConf(
       displayName = "My App",
