@@ -2,7 +2,7 @@ package com.malliina.appbundler
 
 import java.nio.file.{Files, Path}
 
-case class BundleStructure(displayName: String, outputDir: Path) {
+case class BundleStructure(displayName: String, outputDir: Path):
   val appDir = outputDir / s"$displayName.app"
   val contentsDir = appDir / "Contents"
   val macOSDir = contentsDir / "MacOS"
@@ -12,12 +12,10 @@ case class BundleStructure(displayName: String, outputDir: Path) {
   val infoPlistFile = contentsDir / "Info.plist"
   val pkgInfoFile = contentsDir / "PkgInfo"
 
-  val dirs = Seq(appDir, contentsDir, macOSDir, javaDir, pluginsDir, resourcesDir)
-  val files = Seq(infoPlistFile, pkgInfoFile)
+  private val dirs = Seq(appDir, contentsDir, macOSDir, javaDir, pluginsDir, resourcesDir)
+  private val files = Seq(infoPlistFile, pkgInfoFile)
 
-  def prepare() = {
+  def prepare(): Unit =
     AppBundler.delete(appDir)
     dirs.foreach(d => Files.createDirectories(d))
     files.foreach(f => Files.createFile(f))
-  }
-}

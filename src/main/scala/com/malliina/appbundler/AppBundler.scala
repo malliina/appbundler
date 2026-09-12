@@ -1,22 +1,22 @@
 package com.malliina.appbundler
 
-import java.io._
+import java.io.*
 import java.net.URL
-import java.nio.file._
+import java.nio.file.*
 import java.util.zip.ZipInputStream
 
 /** Port of Oracle's AppBundlerTask.java.
   */
-object AppBundler extends JavaResolver {
+object AppBundler extends JavaResolver:
   val DEFAULT_ICON_NAME = "GenericApp.icns"
   val OS_TYPE_CODE = "APPL"
 
-  val BUFFER_SIZE = 2048
+  private val BUFFER_SIZE = 2048
 
-  val runtimeIncludes = Seq(
+  private val runtimeIncludes = Seq(
     "jre/"
   )
-  val runtimeExcludes = Seq(
+  private val runtimeExcludes = Seq(
     "bin/",
     "jre/bin/",
     "jre/lib/deploy/",
@@ -27,18 +27,21 @@ object AppBundler extends JavaResolver {
     "jre/lib/plugin.jar",
     "jre/lib/security/javaws.policy"
   )
-  val includePaths = runtimeIncludes map toPath
-  val excludePaths = runtimeExcludes map toPath
+  val includePaths = runtimeIncludes.map(toPath)
+  val excludePaths = runtimeExcludes.map(toPath)
 
-  def toPath(p: String): Path = Paths.get(p)
+  private def toPath(p: String): Path = Paths.get(p)
 
   /** Builds a .app package in the output directory.
     *
-    * @param infoPlistConf app conf
-    * @param dest          root dest path
-    * @return path to DisplayName.app
+    * @param infoPlistConf
+    *   app conf
+    * @param dest
+    *   root dest path
+    * @return
+    *   path to DisplayName.app
     */
-  def createBundle(infoPlistConf: InfoPlistConf, dest: Path): Path = {
+  def createBundle(infoPlistConf: InfoPlistConf, dest: Path): Path =
     val conf = BundleStructure(infoPlistConf.displayName, dest)
     conf.prepare()
     PlistWriter.writeConf(infoPlistConf, conf.infoPlistFile)
@@ -47,49 +50,48 @@ object AppBundler extends JavaResolver {
     copyResources(conf.resourcesDir)
     copyRuntime(infoPlistConf.javaHome, conf.pluginsDir)
     copyClassPath(infoPlistConf.jars, conf.javaDir)
-    infoPlistConf.iconFile.fold(copyResourceSameName(DEFAULT_ICON_NAME, conf.resourcesDir))(p => {
+    infoPlistConf.iconFile.fold(copyResourceSameName(DEFAULT_ICON_NAME, conf.resourcesDir))(p =>
       copy(p, conf.resourcesDir / p.getFileName)
-    })
+    )
     conf.appDir
-  }
 
-  def copyExecutable(dest: Path) = {
+  private def copyExecutable(dest: Path): Boolean =
     val exeFile = dest.toFile
     copyResource(exeFile.getName, dest)
     exeFile.setExecutable(true, false)
-  }
 
   /** I do not understand what this is.
     *
-    * @param dest resources destination
+    * @param dest
+    *   resources destination
     */
-  private def copyResources(dest: Path): Unit = {
+  private def copyResources(dest: Path): Unit =
     val res = "res.zip"
-    Option(getClass.getResourceAsStream(res)).foreach { stream =>
-      using(new ZipInputStream(stream)) { zipInStream =>
-        Iterator.continually(zipInStream.getNextEntry).takeWhile(_ != null).foreach { zipEntry =>
-          val file = dest / zipEntry.getName
-          if (zipEntry.isDirectory) {
-            Files.createDirectories(file)
-          } else {
-            val outStream = new BufferedOutputStream(new FileOutputStream(file.toFile), BUFFER_SIZE)
-            using(outStream) { _ =>
-              Iterator.continually(zipInStream.read()).takeWhile(_ != -1).foreach(b => outStream.write(b))
-              outStream.flush()
-            }
-          }
-        }
-      }
-    }
-  }
+    Option(getClass.getResourceAsStream(res)).foreach: stream =>
+      using(new ZipInputStream(stream)): zipInStream =>
+        Iterator
+          .continually(zipInStream.getNextEntry)
+          .takeWhile(_ != null)
+          .foreach: zipEntry =>
+            val file = dest / zipEntry.getName
+            if zipEntry.isDirectory then Files.createDirectories(file)
+            else
+              val outStream =
+                new BufferedOutputStream(new FileOutputStream(file.toFile), BUFFER_SIZE)
+              using(outStream): _ =>
+                Iterator
+                  .continually(zipInStream.read())
+                  .takeWhile(_ != -1)
+                  .foreach(b => outStream.write(b))
+                outStream.flush()
 
-  /**
-    *
-    * @param javaHome   the source: something like /Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home
-    * @param plugInsDir destination
+  /** @param javaHome
+    *   the source: something like /Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home
+    * @param plugInsDir
+    *   destination
     * @return
     */
-  def copyRuntime(javaHome: Path, plugInsDir: Path) = {
+  def copyRuntime(javaHome: Path, plugInsDir: Path) =
     val javaHomeDir = resolveJavaDirectory(javaHome)
     val javaContentsDir = javaHomeDir.getParent
     val javaDir = javaContentsDir.getParent
@@ -106,68 +108,60 @@ object AppBundler extends JavaResolver {
     val pluginHomeDir = pluginContentsDir / javaHomeDir.getFileName
     val conf = IncludeConf(javaHomeDir, pluginHomeDir, includePaths, excludePaths)
     Files.walkFileTree(conf.src, new Copier(conf))
-  }
 
-  def copyClassPath(jars: Seq[Path], dest: Path) =
-    jars.foreach { jar =>
+  private def copyClassPath(jars: Seq[Path], dest: Path): Unit =
+    jars.foreach: jar =>
       copy(jar, dest / jar.getFileName)
-    }
 
-  def writePkgInfo(signature: String, dest: Path): Unit =
+  private def writePkgInfo(signature: String, dest: Path): Unit =
     writerTo(dest)(_.println(s"$OS_TYPE_CODE$signature"))
 
-  class Copier(conf: IncludeConf) extends IncludeExcludeVisitor(conf) {
-    override def onSuccess(path: Path): Unit = {
-      copy(path, dest / (src relativize path))
-    }
-  }
+  private class Copier(conf: IncludeConf) extends IncludeExcludeVisitor(conf):
+    override def onSuccess(path: Path): Unit =
+      copy(path, dest / src.relativize(path))
 
-  /** Copies `file` to `dest` if defined, otherwise copies the resource at `orElseResource` to `dest`.
+  /** Copies `file` to `dest` if defined, otherwise copies the resource at `orElseResource` to
+    * `dest`.
     *
-    * @param file           optional file
-    * @param orElseResource fallback resource
-    * @param dest           destination file
+    * @param file
+    *   optional file
+    * @param orElseResource
+    *   fallback resource
+    * @param dest
+    *   destination file
     */
-  def copyFileOrResource(file: Option[Path], orElseResource: String, dest: Path) =
+  def copyFileOrResource(file: Option[Path], orElseResource: String, dest: Path): Unit =
     file.fold(copyResource(orElseResource, dest))(f => copy(f, dest))
 
-  def copyResourceSameName(resName: String, destDir: Path) =
+  private def copyResourceSameName(resName: String, destDir: Path): Unit =
     copyResource(resName, destDir / Paths.get(resName).getFileName)
 
-  def copyResource(resName: String, dest: Path) = copy(resource(resName), dest)
+  private def copyResource(resName: String, dest: Path): Unit = copy(resource(resName), dest)
 
   def copy(url: URL, dest: Path): Unit =
-    using(url.openStream()) { stream =>
+    using(url.openStream()): stream =>
       Files.copy(stream, dest, StandardCopyOption.REPLACE_EXISTING)
-    }
 
-  def copy(source: Path, dest: Path): Unit = {
-    Option(dest.getParent).foreach { d =>
-      if (!Files.isDirectory(d)) {
-        Files.createDirectories(d)
-      }
-    }
+  def copy(source: Path, dest: Path): Unit =
+    Option(dest.getParent).foreach: d =>
+      if !Files.isDirectory(d) then Files.createDirectories(d)
     Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS)
-  }
 
-  def delete(file: Path): Unit = {
-    if (Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
-      if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) {
+  def delete(file: Path): Unit =
+    if Files.exists(file, LinkOption.NOFOLLOW_LINKS) then
+      if Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS) then
         file.toFile.listFiles().map(_.toPath).foreach(delete)
-      }
       Files.delete(file)
-    }
-  }
 
   def resource(resource: String): URL = obtainResource(resource, _.getResource)
 
-  def obtainResource[T](resource: String, getter: ClassLoader => String => T): T =
+  private def obtainResource[T](resource: String, getter: ClassLoader => String => T): T =
     Option(getter(getClass.getClassLoader)(resource))
       .getOrElse(throw new Exception(s"Unable to locate resource: '$resource'."))
 
   def writerTo(filename: Path)(op: PrintWriter => Unit): Unit =
     using(new PrintWriter(new BufferedWriter(new FileWriter(filename.toFile))))(op)
 
-  def using[T <: AutoCloseable, U](resource: T)(op: T => U): U =
-    try op(resource) finally resource.close()
-}
+  private def using[T <: AutoCloseable, U](resource: T)(op: T => U): U =
+    try op(resource)
+    finally resource.close()

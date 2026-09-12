@@ -4,8 +4,8 @@ import java.nio.file.{Path, Paths}
 
 import com.malliina.appbundler.{InfoPlistConf, Installer, LaunchdConf}
 
-class Samples extends munit.FunSuite {
-  test("can create installer".ignore) {
+class Samples extends munit.FunSuite:
+  test("can create installer".ignore):
     val outDir: Path = ???
     val plist = InfoPlistConf(
       displayName = "My App",
@@ -18,5 +18,3 @@ class Samples extends munit.FunSuite {
     val appInstaller = Installer(rootOutput = outDir, infoPlistConf = plist)
     val launchd = LaunchdConf.defaultSettings(plist.displayName, plist.identifier)
     val serviceInstaller = appInstaller.copy(launchdConf = Some(launchd))
-  }
-}

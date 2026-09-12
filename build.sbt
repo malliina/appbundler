@@ -4,14 +4,11 @@ val appBundler = Project("appbundler", file("."))
     gitUserName := "malliina",
     developerName := "Michael Skogberg",
     organization := "com.malliina",
-    scalaVersion := "2.13.12",
-    crossScalaVersions := Seq("2.12.18", scalaVersion.value),
-    releaseCrossBuild := true,
+    scalaVersion := "3.8.4",
     libraryDependencies ++= Seq(
-      "com.malliina" %% "primitives" % "3.4.5",
+      "com.malliina" %% "primitives" % "6.15.4",
       "org.slf4j" % "slf4j-api" % "2.0.9",
       "org.scala-lang.modules" %% "scala-xml" % "2.2.0",
-      "org.scalameta" %% "munit" % "0.7.29" % Test
-    ),
-    testFrameworks += new TestFramework("munit.Framework")
+      "org.scalameta" %% "munit" % "1.3.6" % Test
+    )
   )

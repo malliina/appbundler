@@ -6,48 +6,54 @@ import org.slf4j.LoggerFactory
 
 /** To create a .pkg package of your app, run `macPackage()`.
   *
-  * @param rootOutput         out dir
-  * @param additionalDmgFiles files to include in the image, such as .DS_Store for styling and a .background
+  * @param rootOutput
+  *   out dir
+  * @param additionalDmgFiles
+  *   files to include in the image, such as .DS_Store for styling and a .background
   */
-case class Installer(rootOutput: Path,
-                     infoPlistConf: InfoPlistConf,
-                     launchdConf: Option[LaunchdConf] = None,
-                     iconFile: Option[Path] = None,
-                     additionalDmgFiles: Seq[FileMapping] = Nil,
-                     welcomeHtml: Option[Path] = None,
-                     licenseHtml: Option[Path] = None,
-                     conclusionHtml: Option[Path] = None,
-                     deleteOutOnComplete: Boolean = true) {
+case class Installer(
+  rootOutput: Path,
+  infoPlistConf: InfoPlistConf,
+  launchdConf: Option[LaunchdConf] = None,
+  iconFile: Option[Path] = None,
+  additionalDmgFiles: Seq[FileMapping] = Nil,
+  welcomeHtml: Option[Path] = None,
+  licenseHtml: Option[Path] = None,
+  conclusionHtml: Option[Path] = None,
+  deleteOutOnComplete: Boolean = true
+):
   private val log = LoggerFactory.getLogger(getClass.getName.stripSuffix("$"))
-  val appOutput = rootOutput / "out"
-  val applicationsDir = appOutput / "Applications"
+  private val appOutput = rootOutput / "out"
+  private val applicationsDir = appOutput / "Applications"
   val displayName = infoPlistConf.displayName
   val name = infoPlistConf.name
   val version = infoPlistConf.version
-  val appIdentifier = infoPlistConf.identifier
-  val distributionFile = rootOutput / "Distribution.xml"
-  val resourcesDir = rootOutput / "Resources"
-  val scriptsDir = rootOutput / "Scripts"
-  val pkgDir = rootOutput / "Pkg"
-  val dmgSourceDir = rootOutput / "DmgContents"
-  val packageFile = dmgSourceDir / s"Install $displayName.pkg"
-  val dmgFile = rootOutput / s"$name-$version.dmg"
-  val rootPath = Paths get "/"
+  private val appIdentifier = infoPlistConf.identifier
+  private val distributionFile = rootOutput / "Distribution.xml"
+  private val resourcesDir = rootOutput / "Resources"
+  private val scriptsDir = rootOutput / "Scripts"
+  private val pkgDir = rootOutput / "Pkg"
+  private val dmgSourceDir = rootOutput / "DmgContents"
+  private val packageFile = dmgSourceDir / s"Install $displayName.pkg"
+  private val dmgFile = rootOutput / s"$name-$version.dmg"
+  private val rootPath = Paths.get("/")
 
-  def macPackage(): Path = {
+  private def macPackage(): Path =
     AppBundler.delete(appOutput)
     Files.createDirectories(appOutput)
-    Distribution.writeDistribution(DistributionConf(appIdentifier, displayName, name), distributionFile)
+    Distribution.writeDistribution(
+      DistributionConf(appIdentifier, displayName, name),
+      distributionFile
+    )
     Files.createDirectories(resourcesDir)
     Files.createDirectories(scriptsDir)
-    launchdConf.foreach { launchd =>
+    launchdConf.foreach: launchd =>
       val launchdInstallPath = launchd.plistDir / s"$appIdentifier.plist"
-      val launchdBuildPath = appOutput / (rootPath relativize launchdInstallPath)
+      val launchdBuildPath = appOutput / rootPath.relativize(launchdInstallPath)
       Files.createDirectories(launchdBuildPath.getParent)
       launchd.write(launchdBuildPath)
       writePreInstall(appIdentifier, launchdInstallPath, scriptsDir / "preinstall")
       writePostInstall(launchdInstallPath, scriptsDir / "postinstall")
-    }
     AppBundler.createBundle(infoPlistConf, applicationsDir)
     // runs pkgbuild
     Files.createDirectories(pkgDir)
@@ -57,42 +63,37 @@ case class Installer(rootOutput: Path,
     Files.createDirectories(dmgSourceDir)
     execute(productBuild)
 
-    /**
-      * If the out directory used to build the .pkg is not deleted, the app will fail to install properly on the
-      * development machine. I don't know why, I suspect I'm doing something wrong, but deleting the directory is a
-      * workaround.
+    /** If the out directory used to build the .pkg is not deleted, the app will fail to install
+      * properly on the development machine. I don't know why, I suspect I'm doing something wrong,
+      * but deleting the directory is a workaround.
       */
-    if (deleteOutOnComplete) {
-      AppBundler.delete(appOutput)
-    }
+    if deleteOutOnComplete then AppBundler.delete(appOutput)
     iconFile.foreach(i => iconify(i, packageFile))
     packageFile
-  }
 
-  /**
-    *
-    * @return the built .dmg file
+  /** @return
+    *   the built .dmg file
     */
   def dmgPackage(): Path = buildDmg(macPackage(), displayName, dmgFile)
 
-  def buildDmg(pkgFile: Path, displayName: String, outFile: Path) = {
+  def buildDmg(pkgFile: Path, displayName: String, outFile: Path) =
     val dmgRoot = pkgFile.getParent
-    val absolutes = additionalDmgFiles.map { fm => fm.copy(after = dmgRoot / fm.after) }
-    absolutes.foreach { fm =>
+    val absolutes = additionalDmgFiles.map: fm =>
+      fm.copy(after = dmgRoot / fm.after)
+    absolutes.foreach: fm =>
       val dest = fm.after
       Option(dest.getParent).foreach(d => Files.createDirectories(d))
       Files.copy(fm.before, dest, StandardCopyOption.REPLACE_EXISTING)
-    }
     // hides the extension of the files in the .dmg image when opened in Finder
     (pkgFile +: absolutes.map(_.after)).map(hideExtension).foreach(execute)
     // runs hdiutil
     execute(hdiutil(displayName, dmgRoot, outFile))
     outFile
-  }
 
-  def withLaunchd() = copy(launchdConf = Some(LaunchdConf(appIdentifier, Seq(LaunchdConf.executable(displayName)))))
+  def withLaunchd() =
+    copy(launchdConf = Some(LaunchdConf(appIdentifier, Seq(LaunchdConf.executable(displayName)))))
 
-  def pkgBuild = Seq(
+  private def pkgBuild = Seq(
     "/usr/bin/pkgbuild",
     "--root",
     appOutput.toString,
@@ -107,7 +108,7 @@ case class Installer(rootOutput: Path,
     (pkgDir / s"$name.pkg").toString
   )
 
-  def productBuild = Seq(
+  private def productBuild = Seq(
     "/usr/bin/productbuild",
     "--distribution",
     distributionFile.toString,
@@ -122,15 +123,18 @@ case class Installer(rootOutput: Path,
 
   /** Sets icon `icon` to file `file`.
     *
-    * @param icon icon file
-    * @param file target file
-    * @see http://apple.stackexchange.com/questions/6901/how-can-i-change-a-file-or-folder-icon-using-the-terminal
+    * @param icon
+    *   icon file
+    * @param file
+    *   target file
+    * @see
+    *   http://apple.stackexchange.com/questions/6901/how-can-i-change-a-file-or-folder-icon-using-the-terminal
     */
-  def iconify(icon: Path, file: Path) = {
+  private def iconify(icon: Path, file: Path): Unit =
     val iconStr = icon.toString
     val fileStr = file.toString
     val icnsOut = "tmpicns.icns"
-    val iconResource = Paths get "tmpicns.rsrc"
+    val iconResource = Paths.get("tmpicns.rsrc")
     val iconResourceStr = iconResource.toString
 
     // https://apple.stackexchange.com/a/10783
@@ -146,13 +150,13 @@ case class Installer(rootOutput: Path,
     ExeUtils.executeRedirected(deRez, iconResource, log)
 //    execute(rez)
     Seq(rez, setIcon).foreach(execute)
-  }
 
   /** A command that, when run, hides the extension of `file`.
     *
-    * @return a command
+    * @return
+    *   a command
     */
-  def hideExtension(file: Path) = Seq(
+  private def hideExtension(file: Path) = Seq(
     "/usr/bin/SetFile",
     "-a",
     "E",
@@ -161,12 +165,16 @@ case class Installer(rootOutput: Path,
 
   /** A command that creates a volume named `volumeName` of the contents in `sourceDir`.
     *
-    * @param volumeName name of volume
-    * @param sourceDir  source dir
-    * @param dmgOutFile output .dmg file
-    * @return a command
+    * @param volumeName
+    *   name of volume
+    * @param sourceDir
+    *   source dir
+    * @param dmgOutFile
+    *   output .dmg file
+    * @return
+    *   a command
     */
-  def hdiutil(volumeName: String, sourceDir: Path, dmgOutFile: Path) = Seq(
+  private def hdiutil(volumeName: String, sourceDir: Path, dmgOutFile: Path) = Seq(
     "/usr/bin/hdiutil",
     "create",
     "-volname",
@@ -177,27 +185,23 @@ case class Installer(rootOutput: Path,
     dmgOutFile.toString
   )
 
-  def writePreInstall(identifier: String, launchPlist: Path, buildDest: Path) =
-    scriptify(buildDest) {
+  private def writePreInstall(identifier: String, launchPlist: Path, buildDest: Path) =
+    scriptify(buildDest):
       s"""#!/bin/sh
          |set -e
          |if /bin/launchctl list "$identifier" &> /dev/null; then
          |    /bin/launchctl unload "$launchPlist"
          |fi"""
-    }
 
-  def writePostInstall(launchPlist: Path, buildDest: Path) =
-    scriptify(buildDest) {
+  private def writePostInstall(launchPlist: Path, buildDest: Path) =
+    scriptify(buildDest):
       s"""#!/bin/sh
          |set -e
          |/bin/launchctl load "$launchPlist"
       """
-    }
 
-  def scriptify(buildDest: Path)(f: => String) = {
+  private def scriptify(buildDest: Path)(f: => String) =
     AppBundler.writerTo(buildDest)(w => w.println(f.stripMargin))
     buildDest.toFile.setExecutable(true, false)
-  }
 
-  def execute(command: Seq[String]) = ExeUtils.execute(command, log)
-}
+  private def execute(command: Seq[String]): Unit = ExeUtils.execute(command, log)

@@ -4,17 +4,13 @@ import java.nio.file.Path
 
 import scala.xml.Node
 
-object Distribution extends XmlWriter {
+object Distribution extends XmlWriter:
 
   def writeDistribution(conf: DistributionConf, dest: Path): Unit = writePretty(xml(conf), dest)
 
-  /**
-   * Modified from the web, TODO add link.
-   *
-   * @param conf
-   * @return
-   */
-  def xml(conf: DistributionConf): Node = {
+  /** Modified from the web, TODO add link.
+    */
+  def xml(conf: DistributionConf): Node =
     val appID = conf.appIdentifier
     val daemonName = s"$appID.daemon"
     val displayName = conf.displayName
@@ -46,5 +42,3 @@ object Distribution extends XmlWriter {
         <pkg-ref id={daemonName}/>
       </choice>
     </installer-gui-script>
-  }
-}

@@ -9,3 +9,4 @@ hydra.sbt
 
 .bloop
 out
+.bsp

@@ -4,29 +4,31 @@ import java.nio.file.{Path, Paths}
 
 import com.malliina.appbundler.InfoPlistConf.{DEFAULT_EXECUTABLE_NAME, DEFAULT_JAVA}
 
-case class InfoPlistConf(displayName: String,
-                         name: String,
-                         identifier: String,
-                         version: String,
-                         mainClass: String,
-                         jars: Seq[Path],
-                         javaHome: Path = DEFAULT_JAVA,
-                         jvmOptions: Seq[String] = Nil,
-                         jvmArguments: Seq[String] = Nil,
-                         iconFile: Option[Path] = None,
-                         executableName: String = DEFAULT_EXECUTABLE_NAME,
-                         workingDir: Option[String] = None,
-                         copyright: String = "",
-                         shortVersion: String = "1.0",
-                         hideDock: Boolean = false,
-                         highResolutionCapable: Boolean = false,
-                         supportsAutomaticGraphicsSwitching: Boolean = false,
-                         minimumSystemVersion: Option[String] = None,
-                         applicationCategory: Option[String] = None,
-                         signature: String = "????",
-                         additional: Map[String, String] = Map.empty,
-                         additionalArrays: Map[String, Seq[String]] = Map.empty) {
-  val jvmRuntimeDirName = Option(AppBundler.resolveJavaDirectory(javaHome).getParent)
+case class InfoPlistConf(
+  displayName: String,
+  name: String,
+  identifier: String,
+  version: String,
+  mainClass: String,
+  jars: Seq[Path],
+  javaHome: Path = DEFAULT_JAVA,
+  jvmOptions: Seq[String] = Nil,
+  jvmArguments: Seq[String] = Nil,
+  iconFile: Option[Path] = None,
+  executableName: String = DEFAULT_EXECUTABLE_NAME,
+  workingDir: Option[String] = None,
+  copyright: String = "",
+  shortVersion: String = "1.0",
+  hideDock: Boolean = false,
+  highResolutionCapable: Boolean = false,
+  supportsAutomaticGraphicsSwitching: Boolean = false,
+  minimumSystemVersion: Option[String] = None,
+  applicationCategory: Option[String] = None,
+  signature: String = "????",
+  additional: Map[String, String] = Map.empty,
+  additionalArrays: Map[String, Seq[String]] = Map.empty
+):
+  private val jvmRuntimeDirName = Option(AppBundler.resolveJavaDirectory(javaHome).getParent)
     .flatMap(p => Option(p.getParent)) getOrElse javaHome
 
   private def map: Map[String, String] = Map(
@@ -54,9 +56,12 @@ case class InfoPlistConf(displayName: String,
   ).flatten.toMap
 
   private def boolMap: Map[String, String] = Seq(
-    if (hideDock) Some("LSUIElement" -> "1") else None,
-    if (highResolutionCapable) Some("NSHighResolutionCapable" -> highResolutionCapable.toString) else None,
-    if (supportsAutomaticGraphicsSwitching) Some("NSSupportsAutomaticGraphicsSwitching" -> supportsAutomaticGraphicsSwitching.toString) else None
+    if hideDock then Some("LSUIElement" -> "1") else None,
+    if highResolutionCapable then Some("NSHighResolutionCapable" -> highResolutionCapable.toString)
+    else None,
+    if supportsAutomaticGraphicsSwitching then
+      Some("NSSupportsAutomaticGraphicsSwitching" -> supportsAutomaticGraphicsSwitching.toString)
+    else None
   ).flatten.map(pair => pair._1 -> pair._2).toMap
 
   def singles = map ++ optMap ++ boolMap ++ additional
@@ -65,9 +70,7 @@ case class InfoPlistConf(displayName: String,
     "JVMOptions" -> jvmOptions,
     "JVMArguments" -> jvmArguments
   ) ++ additionalArrays
-}
 
-object InfoPlistConf {
-  val DEFAULT_JAVA = Paths get "/usr/libexec/java_home"
+object InfoPlistConf:
+  val DEFAULT_JAVA = Paths.get("/usr/libexec/java_home")
   val DEFAULT_EXECUTABLE_NAME = "JavaAppLauncher"
-}
